@@ -23,6 +23,8 @@ public class MapsActivity extends FragmentActivity {
     private GoogleMap map; // Might be null if Google Play services APK is not available.
     private ProgressBar progressSpinner;
 
+    private ProgressDialog mProgressDialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,8 +35,21 @@ public class MapsActivity extends FragmentActivity {
         // Initialize map
         setUpMapIfNeeded();
 
-        // Initialize Services
-        ASR.init(this);
+        // Initialize Services in the background
+        new AsyncTask<Void,Void,Void>() {
+            @Override protected void onPreExecute() {
+                mProgressDialog = ProgressDialog.show(MapsActivity.this, "","Loading data...");
+            }
+            @Override protected Void doInBackground(Void... params) {
+                ASR.init(MapsActivity.this);
+                return null;
+            }
+            @Override protected void onPostExecute(Void param) {
+                mProgressDialog.dismiss();
+                mProgressDialog = null;
+                populateMap();
+            }
+        }.execute();
 
     }
 
@@ -42,6 +57,14 @@ public class MapsActivity extends FragmentActivity {
     protected void onResume() {
         super.onResume();
         setUpMapIfNeeded();
+    }
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if(mProgressDialog != null) {
+            mProgressDialog.dismiss();
+            mProgressDialog = null;
+        }
     }
 
     /**
@@ -93,7 +116,7 @@ public class MapsActivity extends FragmentActivity {
             }
         });
 
-        populateMap();
+//        populateMap();
     }
 
     private boolean querying = false;

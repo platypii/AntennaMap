@@ -1,10 +1,7 @@
 package com.platypii.basemap;
 
-import android.app.ProgressDialog;
 import android.content.Context;
-import android.os.AsyncTask;
 import android.util.Log;
-import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -13,16 +10,15 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
 
-public class ASRFile {
+public class ASRFile implements Iterable<ASRRecord> {
 
 	private static final String fileUrl = "https://s3-us-west-1.amazonaws.com/platypii.asrdata/asr.csv";
 	private File file = null;
-
-    private ProgressDialog mProgressDialog;
 
 	public ASRFile(final Context context) {
 
@@ -31,23 +27,10 @@ public class ASRFile {
         final File cacheFile = new File(cacheDir, "asr.csv");
         if(cacheFile.exists()) {
             this.file = cacheFile;
-            Toast.makeText(context, "Using cached ASR data", Toast.LENGTH_LONG).show();
-            return;
+//            Toast.makeText(context, "Using cached ASR data", Toast.LENGTH_LONG).show();
+        } else {
+            download(cacheFile);
         }
-
-        // Start download in background
-		new AsyncTask<Void,Void,Void>() {
-		    @Override protected void onPreExecute() {
-		        mProgressDialog = ProgressDialog.show(context, "","Please wait, Download for " + fileUrl);
-		    }
-			@Override protected Void doInBackground(Void... params) {
-                ASRFile.this.download(cacheFile);
-                return null;
-			}
-		    @Override protected void onPostExecute(Void param) {
-	            mProgressDialog.dismiss();
-		    }
-		}.execute();
 	}
 
     private void download(File cacheFile) {
@@ -74,9 +57,7 @@ public class ASRFile {
                 fileOutput.write(buffer, 0, bufferLength);
                 //add up the size so we know how much is downloaded
                 downloadedSize += bufferLength;
-                //this is where you would do something to report the prgress, like this maybe
-                //updateProgress(downloadedSize, totalSize);
-                Log.w( "DOWNLOAD" , "progress " + downloadedSize + " / " + totalSize);
+                Log.w("DOWNLOAD", "progress " + downloadedSize + " / " + totalSize);
 
             }
             //close the output stream when done
@@ -86,6 +67,48 @@ public class ASRFile {
         } catch(IOException e) {
             Log.e("DOWNLOAD", "ERROR: ", e);
         }
+    }
+
+    @Override
+    public Iterator<ASRRecord> iterator() {
+        return new Iterator<ASRRecord>() {
+            BufferedReader reader;
+            String nextLine;
+            {
+                try {
+                    reader = new BufferedReader(new FileReader(file));
+                    // Skip first line
+                    reader.readLine();
+                    nextLine = reader.readLine();
+                } catch (IOException e) {
+                    Log.e("ASRFile", "Error reading file", e);
+                }
+            }
+            @Override
+            public boolean hasNext() {
+                return nextLine != null;
+            }
+            @Override
+            public ASRRecord next() {
+                final ASRRecord record = parseLine(nextLine);
+                try {
+                    nextLine = reader.readLine();
+                } catch (IOException e) {
+                    nextLine = null;
+                }
+                return record;
+            }
+            @Override
+            public void remove() {}
+        };
+    }
+
+    private ASRRecord parseLine(String line) {
+        final String[] split = line.split(",");
+        final double latitude = Double.parseDouble(split[1]);
+        final double longitude = Double.parseDouble(split[2]);
+        final double height = Double.parseDouble(split[9]);
+        return new ASRRecord(latitude, longitude, height);
     }
 
     /**
