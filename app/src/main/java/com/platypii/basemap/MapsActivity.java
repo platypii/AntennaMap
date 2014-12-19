@@ -1,8 +1,11 @@
 package com.platypii.basemap;
 
+import android.app.ProgressDialog;
+import android.os.AsyncTask;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.ProgressBar;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -18,11 +21,16 @@ import java.util.List;
 public class MapsActivity extends FragmentActivity {
 
     private GoogleMap map; // Might be null if Google Play services APK is not available.
+    private ProgressBar progressSpinner;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+        // Find view elements
+        progressSpinner = (ProgressBar) this.findViewById(R.id.progressSpinner);
+
+        // Initialize map
         setUpMapIfNeeded();
 
         // Initialize Services
@@ -89,22 +97,39 @@ public class MapsActivity extends FragmentActivity {
     }
 
     private boolean querying = false;
+    private long lastQuery = 0;
+    private static final long QUERY_WAIT_TIME = 5000; // millis
     private void populateMap() {
         final LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
-        if(!querying) {
+        if(!querying && System.currentTimeMillis() - lastQuery > QUERY_WAIT_TIME) {
             querying = true;
-            try {
-                final List<ASRRecord> towers = ASR.query(bounds);
-                map.clear();
-                if (towers != null) {
-                    for (ASRRecord tower : towers) {
-                        map.addMarker(new MarkerOptions().position(tower.latLng()).title(tower.height + "m"));
+
+            // Query in the background
+            new AsyncTask<Void,Void,List<ASRRecord>>() {
+                @Override protected void onPreExecute() {
+                    progressSpinner.setVisibility(ProgressBar.VISIBLE);
+                }
+                @Override protected List<ASRRecord> doInBackground(Void... params) {
+                    try {
+                        Log.w("MAP", "Querying ASR");
+                        return ASR.query(bounds);
+                    } catch (IOException e) {
+                        Log.e("MAP", "ASR query exception", e);
+                        return null;
                     }
                 }
-            } catch (IOException e) {
-                Log.e("MAP", "ASR query exception", e);
-            }
-            querying = false;
+                @Override protected void onPostExecute(List<ASRRecord> towers) {
+                    map.clear();
+                    if (towers != null) {
+                        for (ASRRecord tower : towers) {
+                            map.addMarker(new MarkerOptions().position(tower.latLng()).title(Convert.toFeet(tower.height)));
+                        }
+                    }
+                    progressSpinner.setVisibility(ProgressBar.GONE);
+                    lastQuery = System.currentTimeMillis();
+                    querying = false;
+                }
+            }.execute();
         }
     }
 }
