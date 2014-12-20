@@ -2,6 +2,7 @@ package com.platypii.basemap;
 
 import android.app.ProgressDialog;
 import android.os.AsyncTask;
+import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -18,7 +19,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import java.io.IOException;
 import java.util.List;
 
-public class MapsActivity extends FragmentActivity {
+public class MapsActivity extends FragmentActivity implements GoogleMap.OnCameraChangeListener {
 
     private GoogleMap map; // Might be null if Google Play services APK is not available.
     private ProgressBar progressSpinner;
@@ -47,7 +48,7 @@ public class MapsActivity extends FragmentActivity {
             @Override protected void onPostExecute(Void param) {
                 mProgressDialog.dismiss();
                 mProgressDialog = null;
-                populateMap();
+                updateMap();
             }
         }.execute();
 
@@ -86,8 +87,7 @@ public class MapsActivity extends FragmentActivity {
         // Do a null check to confirm that we have not already instantiated the map.
         if (map == null) {
             // Try to obtain the map from the SupportMapFragment.
-            map = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map))
-                    .getMap();
+            map = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map)).getMap();
             // Check if we were successful in obtaining the map.
             if (map != null) {
                 setUpMap();
@@ -96,9 +96,7 @@ public class MapsActivity extends FragmentActivity {
     }
 
     /**
-     * This is where we can add markers or lines, add listeners or move the camera. In this case, we
-     * just add a marker near Africa.
-     * <p/>
+     * This is where we can add markers or lines, add listeners or move the camera.
      * This should only be called once and when we are sure that {@link #map} is not null.
      */
     private void setUpMap() {
@@ -106,25 +104,47 @@ public class MapsActivity extends FragmentActivity {
         map.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
         final LatLng home = new LatLng(47.61, -122.34);
         map.animateCamera(CameraUpdateFactory.newLatLngZoom(home, 10));
-        map.addMarker(new MarkerOptions().position(home).title("Home"));
+//        map.addMarker(new MarkerOptions().position(home).title("Home"));
 
         // Drag listener
-        map.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
-            @Override
-            public void onCameraChange(CameraPosition position) {
-                populateMap();
-            }
-        });
+        map.setOnCameraChangeListener(this);
+    }
 
-//        populateMap();
+    // Drag listener
+    private static final long QUERY_WAIT_TIME = 3000; // millis
+    private boolean running = false;
+    private long lastDrag = 0;
+
+    /**
+     * Class to update map only once every QUERY_WAIT_TIME milliseconds
+     */
+    private Handler handler = new Handler();
+    private Runnable runnable = new Runnable() {
+        @Override public void run() {
+            if(System.currentTimeMillis() < lastDrag + QUERY_WAIT_TIME) {
+                updateMap();
+                // Schedule again
+                handler.postDelayed(runnable, QUERY_WAIT_TIME);
+            } else {
+                // Let it die
+                running = false;
+            }
+        }
+    };
+
+    @Override
+    public void onCameraChange(CameraPosition position) {
+        lastDrag = System.currentTimeMillis();
+        if(!running) {
+            running = true;
+            runnable.run();
+        }
     }
 
     private boolean querying = false;
-    private long lastQuery = 0;
-    private static final long QUERY_WAIT_TIME = 5000; // millis
-    private void populateMap() {
+    private void updateMap() {
         final LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
-        if(!querying && System.currentTimeMillis() - lastQuery > QUERY_WAIT_TIME) {
+        if(!querying) {
             querying = true;
 
             // Query in the background
@@ -149,10 +169,10 @@ public class MapsActivity extends FragmentActivity {
                         }
                     }
                     progressSpinner.setVisibility(ProgressBar.GONE);
-                    lastQuery = System.currentTimeMillis();
                     querying = false;
                 }
             }.execute();
         }
     }
+
 }

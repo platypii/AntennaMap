@@ -9,30 +9,30 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ASRDatabase {
-    private Context context;
 
     private ASRDatabaseHelper helper;
     private SQLiteDatabase database;
 
     public ASRDatabase(Context context) {
-        this.context = context;  // TODO: Leaks context
         helper = new ASRDatabaseHelper(context);
         database = helper.getReadableDatabase();
         if(isEmpty()) {
-            loadFromFile();
+            Log.w("ASRDatabse", "Loading into database");
+            loadFromFile(context);
+            Log.w("ASRDatabse", "Loaded into database");
+        } else {
+            Log.w("ASRDatabse", "Database already loaded");
         }
     }
 
-    private void loadFromFile() {
-        Log.w("ASRDatabse", "Loading into database");
-        SQLiteDatabase writableDatabase = helper.getWritableDatabase();
-        final ASRFile asrFile = new ASRFile(context);
+    private void loadFromFile(Context context) {
+        final SQLiteDatabase writableDatabase = helper.getWritableDatabase();
+        final ASRFile asrFile = ASRFile.load(context);
         for(ASRRecord record : asrFile) {
             // Add to database
             writableDatabase.execSQL("INSERT INTO asr VALUES ("+record.latitude+", "+record.longitude+", "+record.height+");");
         }
         writableDatabase.close();
-        Log.w("ASRDatabse", "Loaded into database");
     }
 
     private boolean isEmpty() {

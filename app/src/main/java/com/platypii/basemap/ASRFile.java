@@ -16,28 +16,37 @@ import java.util.List;
 import javax.net.ssl.HttpsURLConnection;
 
 public class ASRFile implements Iterable<ASRRecord> {
+    // Non-instantiable
+    private ASRFile(File file) {
+        this.file = file;
+    }
 
 	private static final String fileUrl = "https://s3-us-west-1.amazonaws.com/platypii.asrdata/asr.csv";
-	private File file = null;
+	private final File file;
 
-	public ASRFile(final Context context) {
-
+    /**
+     * Load the ASR file
+     */
+	public static synchronized ASRFile load(final Context context) {
         // Check cache
         final File cacheDir = context.getExternalCacheDir();
         final File cacheFile = new File(cacheDir, "asr.csv");
         if(cacheFile.exists()) {
-            this.file = cacheFile;
-//            Toast.makeText(context, "Using cached ASR data", Toast.LENGTH_LONG).show();
+            Log.w("ASRFile", "Found existing asr.csv");
+            return new ASRFile(cacheFile);
         } else {
+            Log.w("ASRFile", "Downloading asr.csv");
             download(cacheFile);
+            Log.w("ASRFile", "Downloaded asr.csv");
+            return new ASRFile(cacheFile);
         }
 	}
 
-    private void download(File cacheFile) {
+    private static void download(File cacheFile) {
         try {
             final URL url = new URL(fileUrl);
 
-            Log.w("DOWNLOAD", "URL: " + url);
+            Log.w("ASRFile", "Downloading URL: " + url);
             final HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
             final FileOutputStream fileOutput = new FileOutputStream(cacheFile);
             final InputStream inputStream = urlConnection.getInputStream();
@@ -57,15 +66,13 @@ public class ASRFile implements Iterable<ASRRecord> {
                 fileOutput.write(buffer, 0, bufferLength);
                 //add up the size so we know how much is downloaded
                 downloadedSize += bufferLength;
-                Log.w("DOWNLOAD", "progress " + downloadedSize + " / " + totalSize);
+                Log.i("ASRFile", "Download progress " + downloadedSize + " / " + totalSize);
 
             }
             //close the output stream when done
             fileOutput.close();
-
-            this.file = cacheFile;
         } catch(IOException e) {
-            Log.e("DOWNLOAD", "ERROR: ", e);
+            Log.e("ASRFile", "Download error: ", e);
         }
     }
 
@@ -111,36 +118,4 @@ public class ASRFile implements Iterable<ASRRecord> {
         return new ASRRecord(latitude, longitude, height);
     }
 
-    /**
-     * Search for the N tallest towers in view
-     */
-	public List<ASRRecord> query(double minLatitude, double maxLatitude, double minLongitude, double maxLongitude, int limit) throws IOException {
-        if(file != null) {
-            final TopN top = new TopN(limit);
-
-            // Search CSV file for top N antennas
-            final BufferedReader reader = new BufferedReader(new FileReader(file));
-            String line = reader.readLine();
-            while((line = reader.readLine()) != null) {
-                final String[] split = line.split(",");
-                // Check if lat/long is within bounding box
-                final double latitude = Double.parseDouble(split[3]);
-                final double longitude = Double.parseDouble(split[4]);
-                if (minLatitude <= latitude && latitude <= maxLatitude && minLongitude <= longitude && longitude <= maxLongitude) {
-                    final double height = Double.parseDouble(split[13]);
-                    final ASRRecord record = new ASRRecord(latitude, longitude, height);
-                    top.add(record);
-                    // Stop after N records
-//                    if (records.size() >= LIMIT) {
-//                        break;
-//                    }
-                }
-            }
-            reader.close();
-            return top.records;
-        } else {
-            return null;
-        }
-	}
-	
 }
