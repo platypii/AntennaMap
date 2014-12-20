@@ -14,12 +14,18 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class MapsActivity extends FragmentActivity implements GoogleMap.OnCameraChangeListener {
+
+    private Handler handler = new Handler();
 
     private GoogleMap map; // Might be null if Google Play services APK is not available.
     private ProgressBar progressSpinner;
@@ -37,21 +43,57 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnCamera
         setUpMapIfNeeded();
 
         // Initialize Services in the background
-        new AsyncTask<Void,Void,Void>() {
-            @Override protected void onPreExecute() {
-                mProgressDialog = ProgressDialog.show(MapsActivity.this, "","Loading data...");
+        new Thread() {
+            @Override public void run() {
+                // Start the database
+                ASRDatabase.start(getApplicationContext());
+                if(ASRDatabase.isEmpty()) {
+                    // Load file
+                    ASRFile.init(getApplicationContext());
+                    if (!ASRFile.isCached()) {
+                        // Create spinner
+                        handler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                mProgressDialog = ProgressDialog.show(MapsActivity.this, "", "Downloading data...");
+                            }
+                        });
+                        // Download data file
+                        ASRFile.download();
+                        // Dismiss spinner
+                        handler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                mProgressDialog.dismiss();
+                            }
+                        });
+                    }
+                    // Create spinner
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mProgressDialog = ProgressDialog.show(MapsActivity.this, "", "Loading data...");
+                        }
+                    });
+                    // Load file into database
+                    ASRDatabase.loadData(ASRFile.iterator());
+                    // Dismiss spinner
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mProgressDialog.dismiss();
+                            mProgressDialog = null;
+                        }
+                    });
+                }
+                // Update map
+                handler.post(new Runnable() {
+                    @Override public void run() {
+                        updateMap();
+                    }
+                });
             }
-            @Override protected Void doInBackground(Void... params) {
-                ASR.init(MapsActivity.this);
-                return null;
-            }
-            @Override protected void onPostExecute(Void param) {
-                mProgressDialog.dismiss();
-                mProgressDialog = null;
-                updateMap();
-            }
-        }.execute();
-
+        }.start();
     }
 
     @Override
@@ -76,12 +118,6 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnCamera
      * If it isn't installed {@link SupportMapFragment} (and
      * {@link com.google.android.gms.maps.MapView MapView}) will show a prompt for the user to
      * install/update the Google Play services APK on their device.
-     * <p/>
-     * A user can return to this FragmentActivity after following the prompt and correctly
-     * installing/updating/enabling the Google Play services. Since the FragmentActivity may not
-     * have been completely destroyed during this process (it is likely that it would only be
-     * stopped or paused), {@link #onCreate(Bundle)} may not be called again so we should call this
-     * method in {@link #onResume()} to guarantee that it will be called.
      */
     private void setUpMapIfNeeded() {
         // Do a null check to confirm that we have not already instantiated the map.
@@ -111,14 +147,13 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnCamera
     }
 
     // Drag listener
-    private static final long QUERY_WAIT_TIME = 3000; // millis
+    private static final long QUERY_WAIT_TIME = 500; // millis
     private boolean running = false;
     private long lastDrag = 0;
 
     /**
      * Class to update map only once every QUERY_WAIT_TIME milliseconds
      */
-    private Handler handler = new Handler();
     private Runnable runnable = new Runnable() {
         @Override public void run() {
             if(System.currentTimeMillis() < lastDrag + QUERY_WAIT_TIME) {
@@ -132,8 +167,7 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnCamera
         }
     };
 
-    @Override
-    public void onCameraChange(CameraPosition position) {
+    @Override public void onCameraChange(CameraPosition position) {
         lastDrag = System.currentTimeMillis();
         if(!running) {
             running = true;
@@ -141,6 +175,7 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnCamera
         }
     }
 
+    private HashMap<ASRRecord,Marker> markers = new HashMap<>();
     private boolean querying = false;
     private void updateMap() {
         final LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
@@ -162,11 +197,28 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnCamera
                     }
                 }
                 @Override protected void onPostExecute(List<ASRRecord> towers) {
-                    map.clear();
                     if (towers != null) {
-                        for (ASRRecord tower : towers) {
-                            map.addMarker(new MarkerOptions().position(tower.latLng()).title(Convert.toFeet(tower.height)));
+                        // Remove stale markers
+                        final Set<ASRRecord> toDelete = new HashSet<>();
+                        for(ASRRecord tower : markers.keySet()) {
+                            if (!towers.contains(tower)) {
+                                markers.get(tower).remove();
+                                toDelete.add(tower);
+                            }
                         }
+                        for(ASRRecord record : toDelete) {
+                            markers.remove(record);
+                        }
+                        // Add new markers
+                        for (ASRRecord tower : towers) {
+                            if(!markers.containsKey(tower)) {
+                                // Create new marker
+                                final Marker marker = map.addMarker(new MarkerOptions().position(tower.latLng()).title(Convert.toFeet(tower.height)));
+                                markers.put(tower, marker);
+                            }
+                        }
+                    } else {
+                        map.clear();
                     }
                     progressSpinner.setVisibility(ProgressBar.GONE);
                     querying = false;

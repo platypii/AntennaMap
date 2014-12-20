@@ -12,10 +12,11 @@ public class ASRDatabaseHelper extends SQLiteOpenHelper {
 
     // Database creation sql statement
     private static final String DATABASE_CREATE = "CREATE TABLE asr (" +
-        "latitude FLOAT," +
-        "longitude FLOAT," +
-        "height INTEGER" +
-        ");";
+            "id INTEGER PRIMARY KEY," +
+            "latitude FLOAT," +
+            "longitude FLOAT," +
+            "height INTEGER" +
+            ")";
 
     public ASRDatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -24,6 +25,9 @@ public class ASRDatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase database) {
         database.execSQL(DATABASE_CREATE);
+        database.execSQL("CREATE INDEX latitude_index ON asr(latitude)");
+        database.execSQL("CREATE INDEX longitude_index ON asr(longitude)");
+        database.execSQL("CREATE INDEX height_index ON asr(height)");
     }
 
     @Override
