@@ -1,15 +1,17 @@
 package com.platypii.basemap;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.AsyncTask;
 import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class ASRDatabase {
+class ASRDatabase {
 
     private static ASRDatabaseHelper helper;
     private static SQLiteDatabase database;
@@ -23,6 +25,60 @@ public class ASRDatabase {
         started = true;
         loaded = !isEmpty();
     }
+
+    public static void loadDataAsync(final Iterator<ASRRecord> asrIterator, final Context appContext, final MapsActivity activity) {
+        new AsyncTask<Void, Integer, Void>() {
+            private ProgressDialog mProgressDialog;
+            @Override
+            protected void onPreExecute() {
+                mProgressDialog = new ProgressDialog(activity);
+                mProgressDialog.setIndeterminate(false);
+                mProgressDialog.setCancelable(false);
+                mProgressDialog.setMessage("Loading data...");
+                mProgressDialog.show();
+            }
+            @Override
+            protected Void doInBackground(Void... params) {
+                Log.w("ASRDatabase", "Loading database");
+                database.close();
+                database = null;
+                final SQLiteDatabase writableDatabase = helper.getWritableDatabase();
+                int count = 0;
+                writableDatabase.execSQL("BEGIN TRANSACTION");
+                while (asrIterator.hasNext()) {
+                    final ASRRecord record = asrIterator.next();
+                    if(record != null) {
+                        // Add to database
+                        writableDatabase.execSQL("INSERT OR IGNORE INTO asr VALUES (" + record.id + "," + record.latitude + "," + record.longitude + "," + record.height + ")");
+                        if (count % 100 == 0) {
+                            Log.i("ASRDatabase", "Populating database row " + count);
+                        }
+                        count++;
+                    }
+                }
+                writableDatabase.execSQL("COMMIT");
+                writableDatabase.close();
+                database = helper.getReadableDatabase();
+                loaded = true;
+                Log.w("ASRDatabase", "Database loaded from file");
+                return null;
+            }
+            @Override
+            protected void onProgressUpdate(Integer... progress) {
+                super.onProgressUpdate(progress);
+                // if we get here, length is known, now set indeterminate to false
+                mProgressDialog.setIndeterminate(false);
+                mProgressDialog.setMax(100);
+                mProgressDialog.setProgress(progress[0]);
+            }
+            @Override
+            protected void onPostExecute(Void result) {
+                mProgressDialog.dismiss();
+                ASR.databaseLoaded(appContext, activity);
+            }
+        }.execute();
+    }
+
 
     public static void loadData(Iterator<ASRRecord> asrIterator) {
         Log.w("ASRDatabase", "Loading database");

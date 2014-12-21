@@ -20,6 +20,10 @@ public class ASRRecord {
         return new LatLng(latitude, longitude);
     }
 
+    public String url() {
+        return "http://wireless2.fcc.gov/UlsApp/AsrSearch/asrRegistration.jsp?regKey=" + id;
+    }
+
     @Override public boolean equals(Object obj) {
         return obj instanceof ASRRecord && id == ((ASRRecord)obj).id;
     }

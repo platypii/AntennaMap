@@ -1,10 +1,12 @@
 package com.platypii.basemap;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.widget.ProgressBar;
 
@@ -18,15 +20,15 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
-public class MapsActivity extends FragmentActivity implements GoogleMap.OnCameraChangeListener {
+public class MapsActivity extends FragmentActivity implements GoogleMap.OnCameraChangeListener, GoogleMap.OnInfoWindowClickListener{
 
-    private Handler handler = new Handler();
+    private final Handler handler = new Handler();
 
     private GoogleMap map; // Might be null if Google Play services APK is not available.
     private ProgressBar progressSpinner;
@@ -44,57 +46,7 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnCamera
         setUpMapIfNeeded();
 
         // Initialize Services in the background
-        new Thread() {
-            @Override public void run() {
-                // Start the database
-                ASRDatabase.start(getApplicationContext());
-                if(ASRDatabase.isEmpty()) {
-                    // Load file
-                    ASRFile.init(getApplicationContext());
-                    if (!ASRFile.isCached()) {
-                        // Create spinner
-                        handler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                mProgressDialog = ProgressDialog.show(MapsActivity.this, "", "Downloading data...");
-                            }
-                        });
-                        // Download data file
-                        ASRFile.download();
-                        // Dismiss spinner
-                        handler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                mProgressDialog.dismiss();
-                            }
-                        });
-                    }
-                    // Create spinner
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            mProgressDialog = ProgressDialog.show(MapsActivity.this, "", "Loading data...");
-                        }
-                    });
-                    // Load file into database
-                    ASRDatabase.loadData(ASRFile.iterator());
-                    // Dismiss spinner
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            mProgressDialog.dismiss();
-                            mProgressDialog = null;
-                        }
-                    });
-                }
-                // Update map
-                handler.post(new Runnable() {
-                    @Override public void run() {
-                        updateMap();
-                    }
-                });
-            }
-        }.start();
+        ASR.init(getApplicationContext(), this);
     }
 
     @Override
@@ -145,6 +97,7 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnCamera
 
         // Drag listener
         map.setOnCameraChangeListener(this);
+        map.setOnInfoWindowClickListener(this);
     }
 
     // Drag listener
@@ -168,7 +121,8 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnCamera
         }
     };
 
-    @Override public void onCameraChange(CameraPosition position) {
+    @Override
+    public void onCameraChange(CameraPosition position) {
         lastDrag = System.currentTimeMillis();
         if(!running) {
             running = true;
@@ -176,9 +130,9 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnCamera
         }
     }
 
-    private HashMap<ASRRecord,Marker> markers = new HashMap<>();
+    private final HashMap<ASRRecord,Marker> markers = new HashMap<>();
     private boolean querying = false;
-    private void updateMap() {
+    public void updateMap() {
         final LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
         if(!querying) {
             querying = true;
@@ -189,13 +143,8 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnCamera
                     progressSpinner.setVisibility(ProgressBar.VISIBLE);
                 }
                 @Override protected List<ASRRecord> doInBackground(Void... params) {
-                    try {
-                        Log.w("MAP", "Querying ASR");
-                        return ASR.query(bounds);
-                    } catch (IOException e) {
-                        Log.e("MAP", "ASR query exception", e);
-                        return null;
-                    }
+                    Log.w("MAP", "Querying ASR");
+                    return ASR.query(bounds);
                 }
                 @Override protected void onPostExecute(List<ASRRecord> towers) {
                     if (towers != null) {
@@ -236,4 +185,18 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnCamera
         }
     }
 
+    @Override
+    public void onInfoWindowClick(Marker marker) {
+        Log.w("Map", "Clicked marker info");
+        // Find which marker
+        for(Map.Entry<ASRRecord,Marker> entry : markers.entrySet()) {
+            if(entry.getValue().equals(marker)) {
+                final ASRRecord record = entry.getKey();
+                // Open url
+                Log.w("Map", "Opening url for tower " + record.id);
+                final Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(record.url()));
+                startActivity(browserIntent);
+            }
+        }
+    }
 }
