@@ -5,7 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
-public class ASRDatabaseHelper extends SQLiteOpenHelper {
+class ASRDatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "asr.db";
     private static final int DATABASE_VERSION = 1;

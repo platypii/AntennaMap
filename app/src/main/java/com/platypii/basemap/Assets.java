@@ -8,7 +8,7 @@ import android.graphics.drawable.Drawable;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 
-public class Assets {
+class Assets {
 
     // sizedIcons[0] = 0..100m
     // sizedIcons[1] = 1..200m

@@ -1,6 +1,5 @@
 package com.platypii.basemap;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -21,84 +20,77 @@ class ASRFile {
 	private static final String fileUrl = "https://s3-us-west-1.amazonaws.com/platypii.asrdata/asr-min.csv";
 	private static File cacheFile;
 
-    public static void init(Context appContext) {
-        final File cacheDir = appContext.getExternalCacheDir();
-        cacheFile = new File(cacheDir, "asr.csv");
-    }
-
-    public static boolean isCached() {
-        if(cacheFile == null) {
-            Log.e("ASRFile", "Not initialized");
-            return false;
+    public static void loadAsync(final Context appContext) {
+        // Get reference to cache file
+        if(cacheFile != null) {
+            Log.e("ASRFile", "Already loaded");
         } else {
-            return cacheFile.exists();
+            final File cacheDir = appContext.getExternalCacheDir();
+            cacheFile = new File(cacheDir, "asr.csv");
+        }
+        // Check if the file is cached
+        if(cacheFile.exists()) {
+            ASR.fileLoaded();
+        } else {
+            // Download ASR file
+            new DownloadTask().execute();
         }
     }
 
-    public static void downloadAsync(final Context context, final MapsActivity activity) {
-        new AsyncTask<Void, Integer, Void>() {
-            private ProgressDialog mProgressDialog;
-            @Override
-            protected void onPreExecute() {
-                mProgressDialog = new ProgressDialog(activity);
-                mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-                mProgressDialog.setIndeterminate(true);
-                mProgressDialog.setMax(1);
-                mProgressDialog.setCancelable(false);
-                mProgressDialog.setMessage("Downloading data...");
-                mProgressDialog.show();
-            }
-            @Override
-            protected Void doInBackground(Void... params) {
-                Log.w("ASRFile", "Downloading asr.csv");
-                try {
-                    final URL url = new URL(fileUrl);
+    private static class DownloadTask extends AsyncTask<Void, Integer, Void> {
+        private int totalSize = -1;
 
-                    Log.w("ASRFile", "Downloading URL: " + url);
-                    final HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
-                    final InputStream inputStream = urlConnection.getInputStream();
+        @Override
+        protected void onPreExecute() {
+            MapsActivity.startProgress("Downloading data...");
+        }
+        @Override
+        protected Void doInBackground(Void... params) {
+            Log.w("ASRFile", "Downloading asr.csv");
+            try {
+                final URL url = new URL(fileUrl);
 
-                    //this is the total size of the file
-                    final int totalSize = urlConnection.getContentLength();
-                    mProgressDialog.setIndeterminate(false);
-                    mProgressDialog.setMax(totalSize);
-                    //variable to store total downloaded bytes
-                    int downloadedSize = 0;
+                Log.w("ASRFile", "Downloading URL: " + url);
+                final HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
+                final InputStream inputStream = urlConnection.getInputStream();
 
-                    //create a buffer...
-                    final byte[] buffer = new byte[1024];
-                    int bufferLength = 0; //used to store a temporary size of the buffer
+                //this is the total size of the file
+                totalSize = urlConnection.getContentLength();
+                int downloadedSize = 0;
+                publishProgress(0);
 
-                    //now, read through the input buffer and write the contents to the file
-                    final FileOutputStream fileOutput = new FileOutputStream(cacheFile);
-                    while( (bufferLength = inputStream.read(buffer)) > 0 ) {
-                        //add the data in the buffer to the file in the file output stream (the file on the sd card
-                        fileOutput.write(buffer, 0, bufferLength);
-                        //add up the size so we know how much is downloaded
-                        downloadedSize += bufferLength;
-                        Log.i("ASRFile", "Download progress " + downloadedSize + " / " + totalSize);
-                        publishProgress(downloadedSize);
-                    }
-                    //close the output stream when done
-                    fileOutput.close();
-                    Log.w("ASRFile", "Downloaded asr.csv");
-                } catch(IOException e) {
-                    Log.e("ASRFile", "Download error: ", e);
+                //create a buffer...
+                final byte[] buffer = new byte[1024];
+                int bufferLength = 0; //used to store a temporary size of the buffer
+
+                //now, read through the input buffer and write the contents to the file
+                final FileOutputStream fileOutput = new FileOutputStream(cacheFile);
+                while( (bufferLength = inputStream.read(buffer)) > 0 ) {
+                    //add the data in the buffer to the file in the file output stream (the file on the sd card
+                    fileOutput.write(buffer, 0, bufferLength);
+                    //add up the size so we know how much is downloaded
+                    downloadedSize += bufferLength;
+                    Log.i("ASRFile", "Download progress " + downloadedSize + " / " + totalSize);
+                    publishProgress(downloadedSize);
                 }
-                return null;
+                //close the output stream when done
+                fileOutput.close();
+                Log.w("ASRFile", "Downloaded asr.csv");
+            } catch(IOException e) {
+                Log.e("ASRFile", "Download error: ", e);
             }
-            @Override
-            protected void onProgressUpdate(Integer... progress) {
-                super.onProgressUpdate(progress);
-                // if we get here, length is known, now set indeterminate to false
-                mProgressDialog.setProgress(progress[0]);
-            }
-            @Override
-            protected void onPostExecute(Void result) {
-                mProgressDialog.dismiss();
-                ASR.fileLoaded(context, activity);
-            }
-        }.execute();
+            return null;
+        }
+        @Override
+        protected void onProgressUpdate(Integer... progress) {
+            super.onProgressUpdate(progress);
+            MapsActivity.updateProgress("Downloading data...", progress[0], totalSize);
+        }
+        @Override
+        protected void onPostExecute(Void result) {
+            MapsActivity.dismissProgress();
+            ASR.fileLoaded();
+        }
     }
 
     public static int rowCount() {

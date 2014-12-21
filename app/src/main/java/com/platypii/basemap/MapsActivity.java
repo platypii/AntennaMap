@@ -28,6 +28,8 @@ import java.util.Set;
 
 public class MapsActivity extends FragmentActivity implements GoogleMap.OnCameraChangeListener, GoogleMap.OnInfoWindowClickListener{
 
+    private static MapsActivity instance = null;
+
     private final Handler handler = new Handler();
 
     private GoogleMap map; // Might be null if Google Play services APK is not available.
@@ -44,14 +46,64 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnCamera
         // Initialize map
         setUpMapIfNeeded();
 
+        // Export this
+        MapsActivity.instance = this;
+
         // Initialize Services in the background
-        ASR.init(getApplicationContext(), this);
+        ASR.init(getApplicationContext());
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         setUpMapIfNeeded();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mProgressDialog.dismiss();
+        mProgressDialog = null;
+        MapsActivity.instance = null;
+    }
+
+    private ProgressDialog mProgressDialog;
+    public static void startProgress(String message) {
+        if (instance != null) {
+            instance.mProgressDialog = new ProgressDialog(instance);
+            instance.mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+            instance.mProgressDialog.setIndeterminate(true);
+            instance.mProgressDialog.setMax(1);
+            instance.mProgressDialog.setCancelable(false);
+            instance.mProgressDialog.setMessage(message);
+            instance.mProgressDialog.show();
+        }
+    }
+    public static void updateProgress(String message, int progress, int total) {
+        if (instance != null) {
+            if(instance.mProgressDialog == null) {
+                instance.mProgressDialog = new ProgressDialog(instance);
+                instance.mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                instance.mProgressDialog.setCancelable(false);
+                instance.mProgressDialog.setIndeterminate(false);
+                instance.mProgressDialog.setMax(total);
+                instance.mProgressDialog.setProgress(progress);
+                instance.mProgressDialog.setMessage(message);
+                instance.mProgressDialog.show();
+            } else {
+                instance.mProgressDialog.setIndeterminate(false);
+                instance.mProgressDialog.setMax(total);
+                instance.mProgressDialog.setProgress(progress);
+                instance.mProgressDialog.setMessage(message);
+            }
+        }
+    }
+    public static void dismissProgress() {
+        if (instance != null) {
+            if(instance.mProgressDialog != null && instance.mProgressDialog.isShowing()) {
+                instance.mProgressDialog.dismiss();
+            }
+        }
     }
 
     /**
@@ -99,10 +151,10 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnCamera
     /**
      * Class to update map only once every QUERY_WAIT_TIME milliseconds
      */
-    private Runnable runnable = new Runnable() {
+    private final Runnable runnable = new Runnable() {
         @Override public void run() {
             if(System.currentTimeMillis() < lastDrag + QUERY_WAIT_TIME) {
-                updateMap();
+                mUpdateMap();
                 // Schedule again
                 handler.postDelayed(runnable, QUERY_WAIT_TIME);
             } else {
@@ -123,7 +175,7 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnCamera
 
     private final HashMap<ASRRecord,Marker> markers = new HashMap<>();
     private boolean querying = false;
-    public void updateMap() {
+    private void mUpdateMap() {
         final LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
         if(!querying) {
             querying = true;
@@ -134,7 +186,6 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnCamera
                     progressSpinner.setVisibility(ProgressBar.VISIBLE);
                 }
                 @Override protected List<ASRRecord> doInBackground(Void... params) {
-                    Log.w("MAP", "Querying ASR");
                     return ASR.query(bounds);
                 }
                 @Override protected void onPostExecute(List<ASRRecord> towers) {
@@ -173,6 +224,11 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnCamera
                     querying = false;
                 }
             }.execute();
+        }
+    }
+    public static void updateMap() {
+        if(instance != null) {
+            instance.mUpdateMap();
         }
     }
 
