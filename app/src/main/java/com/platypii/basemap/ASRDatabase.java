@@ -32,7 +32,9 @@ class ASRDatabase {
             @Override
             protected void onPreExecute() {
                 mProgressDialog = new ProgressDialog(activity);
-                mProgressDialog.setIndeterminate(false);
+                mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                mProgressDialog.setIndeterminate(true);
+                mProgressDialog.setMax(1);
                 mProgressDialog.setCancelable(false);
                 mProgressDialog.setMessage("Loading data...");
                 mProgressDialog.show();
@@ -40,6 +42,11 @@ class ASRDatabase {
             @Override
             protected Void doInBackground(Void... params) {
                 Log.w("ASRDatabase", "Loading database");
+                // Get row count
+                mProgressDialog.setMax(ASRFile.rowCount());
+                mProgressDialog.setIndeterminate(false);
+
+                // Write to database
                 database.close();
                 database = null;
                 final SQLiteDatabase writableDatabase = helper.getWritableDatabase();
@@ -52,6 +59,7 @@ class ASRDatabase {
                         writableDatabase.execSQL("INSERT OR IGNORE INTO asr VALUES (" + record.id + "," + record.latitude + "," + record.longitude + "," + record.height + ")");
                         if (count % 100 == 0) {
                             Log.i("ASRDatabase", "Populating database row " + count);
+                            publishProgress(count);
                         }
                         count++;
                     }
@@ -67,8 +75,6 @@ class ASRDatabase {
             protected void onProgressUpdate(Integer... progress) {
                 super.onProgressUpdate(progress);
                 // if we get here, length is known, now set indeterminate to false
-                mProgressDialog.setIndeterminate(false);
-                mProgressDialog.setMax(100);
                 mProgressDialog.setProgress(progress[0]);
             }
             @Override
@@ -77,31 +83,6 @@ class ASRDatabase {
                 ASR.databaseLoaded(appContext, activity);
             }
         }.execute();
-    }
-
-
-    public static void loadData(Iterator<ASRRecord> asrIterator) {
-        Log.w("ASRDatabase", "Loading database");
-        database.close();
-        final SQLiteDatabase writableDatabase = helper.getWritableDatabase();
-        int count = 0;
-        writableDatabase.execSQL("BEGIN TRANSACTION");
-        while (asrIterator.hasNext()) {
-            final ASRRecord record = asrIterator.next();
-            if(record != null) {
-                // Add to database
-                writableDatabase.execSQL("INSERT OR IGNORE INTO asr VALUES (" + record.id + "," + record.latitude + "," + record.longitude + "," + record.height + ")");
-                if (count % 100 == 0) {
-                    Log.i("ASRDatabase", "Populating database row " + count);
-                }
-                count++;
-            }
-        }
-        writableDatabase.execSQL("COMMIT");
-        writableDatabase.close();
-        database = helper.getReadableDatabase();
-        loaded = true;
-        Log.w("ASRDatabase", "Database loaded from file");
     }
 
     public static boolean isEmpty() {
@@ -117,10 +98,13 @@ class ASRDatabase {
     public static List<ASRRecord> query(double minLatitude, double maxLatitude, double minLongitude, double maxLongitude, int limit) {
         if(loaded) {
             final String params[] = {"" + minLatitude, "" + maxLatitude, "" + minLongitude, "" + maxLongitude, "" + limit};
+            final String longitudeQuery = (minLongitude < maxLongitude)?
+                    " AND ? < longitude AND longitude < ?" :
+                    " AND ? < longitude OR longitude < ?";
             final Cursor cursor = database.rawQuery(
                     "SELECT * FROM asr" +
                             " WHERE ? < latitude AND latitude < ?" +
-                            " AND ? < longitude AND longitude < ?" +
+                            longitudeQuery +
                             " ORDER BY height DESC LIMIT ?", params);
             ArrayList<ASRRecord> records = new ArrayList<>();
             while (cursor.moveToNext()) {

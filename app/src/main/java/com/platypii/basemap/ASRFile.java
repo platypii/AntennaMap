@@ -11,6 +11,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.LineNumberReader;
 import java.net.URL;
 import java.util.Iterator;
 
@@ -40,7 +41,9 @@ class ASRFile {
             @Override
             protected void onPreExecute() {
                 mProgressDialog = new ProgressDialog(activity);
-                mProgressDialog.setIndeterminate(false);
+                mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                mProgressDialog.setIndeterminate(true);
+                mProgressDialog.setMax(1);
                 mProgressDialog.setCancelable(false);
                 mProgressDialog.setMessage("Downloading data...");
                 mProgressDialog.show();
@@ -57,6 +60,7 @@ class ASRFile {
 
                     //this is the total size of the file
                     final int totalSize = urlConnection.getContentLength();
+                    mProgressDialog.setIndeterminate(false);
                     mProgressDialog.setMax(totalSize);
                     //variable to store total downloaded bytes
                     int downloadedSize = 0;
@@ -73,8 +77,7 @@ class ASRFile {
                         //add up the size so we know how much is downloaded
                         downloadedSize += bufferLength;
                         Log.i("ASRFile", "Download progress " + downloadedSize + " / " + totalSize);
-                        final int progress = 100 * downloadedSize / totalSize;
-                        publishProgress(progress);
+                        publishProgress(downloadedSize);
                     }
                     //close the output stream when done
                     fileOutput.close();
@@ -88,8 +91,6 @@ class ASRFile {
             protected void onProgressUpdate(Integer... progress) {
                 super.onProgressUpdate(progress);
                 // if we get here, length is known, now set indeterminate to false
-                mProgressDialog.setIndeterminate(false);
-                mProgressDialog.setMax(100);
                 mProgressDialog.setProgress(progress[0]);
             }
             @Override
@@ -100,14 +101,33 @@ class ASRFile {
         }.execute();
     }
 
+    public static int rowCount() {
+        if (cacheFile == null) {
+            Log.e("ASRFile", "Not initialized");
+            return -1;
+        } else {
+            // Count rows in cache file
+            try {
+                final LineNumberReader lineNumberReader = new LineNumberReader(new FileReader(cacheFile));
+                lineNumberReader.skip(Long.MAX_VALUE);
+                final int lines = lineNumberReader.getLineNumber();
+                lineNumberReader.close();
+                return lines;
+            } catch(IOException e) {
+                Log.e("ASRFile", "Failed to read ASR file", e);
+                return -1;
+            }
+        }
+    }
+
     public static Iterator<ASRRecord> iterator() {
         if(cacheFile == null) {
             Log.e("ASRFile", "Not initialized");
             return null;
         } else {
             return new Iterator<ASRRecord>() {
-                BufferedReader reader;
-                String nextLine;
+                private BufferedReader reader;
+                private String nextLine;
 
                 {
                     try {

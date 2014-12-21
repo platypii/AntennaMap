@@ -33,14 +33,13 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnCamera
     private GoogleMap map; // Might be null if Google Play services APK is not available.
     private ProgressBar progressSpinner;
 
-    private ProgressDialog mProgressDialog;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         // Find view elements
         progressSpinner = (ProgressBar) this.findViewById(R.id.progressSpinner);
+        progressSpinner.setVisibility(ProgressBar.GONE);
 
         // Initialize map
         setUpMapIfNeeded();
@@ -53,14 +52,6 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnCamera
     protected void onResume() {
         super.onResume();
         setUpMapIfNeeded();
-    }
-    @Override
-    protected void onPause() {
-        super.onPause();
-        if(mProgressDialog != null) {
-            mProgressDialog.dismiss();
-            mProgressDialog = null;
-        }
     }
 
     /**
