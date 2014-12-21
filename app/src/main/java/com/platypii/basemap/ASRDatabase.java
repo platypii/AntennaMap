@@ -32,12 +32,14 @@ public class ASRDatabase {
         writableDatabase.execSQL("BEGIN TRANSACTION");
         while (asrIterator.hasNext()) {
             final ASRRecord record = asrIterator.next();
-            // Add to database
-            writableDatabase.execSQL("INSERT INTO asr VALUES ("+record.id+","+record.latitude+","+record.longitude+","+record.height+")");
-            if(count % 100 == 0) {
-                Log.i("ASRDatabase", "Populating database row " + count);
+            if(record != null) {
+                // Add to database
+                writableDatabase.execSQL("INSERT OR IGNORE INTO asr VALUES (" + record.id + "," + record.latitude + "," + record.longitude + "," + record.height + ")");
+                if (count % 100 == 0) {
+                    Log.i("ASRDatabase", "Populating database row " + count);
+                }
+                count++;
             }
-            count++;
         }
         writableDatabase.execSQL("COMMIT");
         writableDatabase.close();

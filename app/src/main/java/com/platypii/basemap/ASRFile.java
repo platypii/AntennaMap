@@ -116,11 +116,20 @@ public class ASRFile {
      */
     private static ASRRecord parseLine(String line) {
         final String[] split = line.split(",");
-        final long id = Long.parseLong(split[0]);
-        final double latitude = Double.parseDouble(split[1]);
-        final double longitude = Double.parseDouble(split[2]);
-        final double height = Double.parseDouble(split[3]);
-        return new ASRRecord(id, latitude, longitude, height);
+        if(split.length < 4 || split[0].equals("") || split[1].equals("") || split[2].equals("") || split[3].equals("")) {
+            Log.i("ASRFile", "Failed to parse line " + line);
+            return null;
+        }
+        try {
+            final long id = Long.parseLong(split[0]);
+            final double latitude = Double.parseDouble(split[1]) / 3600.0;
+            final double longitude = - Double.parseDouble(split[2]) / 3600.0;
+            final double height = Double.parseDouble(split[3]);
+            return new ASRRecord(id, latitude, longitude, height);
+        } catch(Exception e) {
+            Log.e("ASRFile", "Failed to parse line " + line, e);
+            return null;
+        }
     }
 
 }

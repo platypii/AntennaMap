@@ -11,6 +11,7 @@ import android.widget.ProgressBar;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
@@ -137,7 +138,7 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnCamera
      */
     private void setUpMap() {
         map.setMyLocationEnabled(true);
-        map.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+        map.setMapType(GoogleMap.MAP_TYPE_HYBRID);
         final LatLng home = new LatLng(47.61, -122.34);
         map.animateCamera(CameraUpdateFactory.newLatLngZoom(home, 10));
 //        map.addMarker(new MarkerOptions().position(home).title("Home"));
@@ -213,7 +214,15 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnCamera
                         for (ASRRecord tower : towers) {
                             if(!markers.containsKey(tower)) {
                                 // Create new marker
-                                final Marker marker = map.addMarker(new MarkerOptions().position(tower.latLng()).title(Convert.toFeet(tower.height)));
+                                final float alpha = (float)(tower.height) / 1260f + 0.5f;
+                                final BitmapDescriptor icon = Assets.getSizedIcon(MapsActivity.this, tower.height);
+                                final Marker marker = map.addMarker(
+                                        new MarkerOptions()
+                                                .position(tower.latLng())
+                                                .icon(icon)
+                                                .title(Convert.toFeet(tower.height))
+                                                .alpha(alpha)
+                                );
                                 markers.put(tower, marker);
                             }
                         }
