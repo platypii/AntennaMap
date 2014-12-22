@@ -6,18 +6,20 @@ import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.net.URL;
 import java.util.Iterator;
+import java.util.zip.GZIPInputStream;
 
 import javax.net.ssl.HttpsURLConnection;
 
 class ASRFile {
-	private static final String fileUrl = "https://s3-us-west-1.amazonaws.com/platypii.asrdata/asr-min.csv";
+	private static final String fileUrl = "https://s3-us-west-1.amazonaws.com/platypii.asrdata/asr-min.csv.gz";
 	private static File cacheFile;
 
     public static void loadAsync(final Context appContext) {
@@ -26,7 +28,7 @@ class ASRFile {
             Log.e("ASRFile", "Already loaded");
         } else {
             final File cacheDir = appContext.getExternalCacheDir();
-            cacheFile = new File(cacheDir, "asr.csv");
+            cacheFile = new File(cacheDir, "asr.csv.gz");
         }
         // Check if the file is cached
         if(cacheFile.exists()) {
@@ -100,7 +102,7 @@ class ASRFile {
         } else {
             // Count rows in cache file
             try {
-                final LineNumberReader lineNumberReader = new LineNumberReader(new FileReader(cacheFile));
+                final LineNumberReader lineNumberReader = new LineNumberReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(cacheFile))));
                 lineNumberReader.skip(Long.MAX_VALUE);
                 final int lines = lineNumberReader.getLineNumber();
                 lineNumberReader.close();
@@ -123,7 +125,7 @@ class ASRFile {
 
                 {
                     try {
-                        reader = new BufferedReader(new FileReader(cacheFile));
+                        reader = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(cacheFile))));
                         // Skip first line
                         reader.readLine();
                         nextLine = reader.readLine();

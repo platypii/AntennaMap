@@ -18,7 +18,7 @@ class Assets {
         final int index = (int)(height / 100);
         if(sizedIcons[index] == null) {
             // Generate icon
-            final int size = 50 + index * 16;
+            final int size = 40 + index * 16;
             final Drawable drawable = context.getResources().getDrawable(R.drawable.tower_yellow);
             final Bitmap bitmap = ((BitmapDrawable)(drawable)).getBitmap();
             final Bitmap bitmapScaled = Bitmap.createScaledBitmap(bitmap, size, size, false);
