@@ -62,8 +62,10 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnCamera
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mProgressDialog.dismiss();
-        mProgressDialog = null;
+        if(mProgressDialog != null) {
+            mProgressDialog.dismiss();
+            mProgressDialog = null;
+        }
         MapsActivity.instance = null;
     }
 
@@ -176,8 +178,12 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnCamera
     private final HashMap<ASRRecord,Marker> markers = new HashMap<>();
     private boolean querying = false;
     private void mUpdateMap() {
-        final LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
-        if(!querying) {
+        if(querying) {
+            Log.w("Map", "Update called, but still querying");
+        } else if(map == null) {
+            Log.e("Map", "Update called, but map not initialized");
+        } else {
+            final LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
             querying = true;
 
             // Query in the background

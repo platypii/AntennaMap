@@ -90,10 +90,11 @@ class ASRDatabase {
                 if (record != null) {
                     // Add to database
                     writableDatabase.execSQL("INSERT OR IGNORE INTO asr VALUES (" + record.id + "," + record.latitude + "," + record.longitude + "," + record.height + ")");
-                    if (count % 1000 == 0) {
-                        Log.i("ASRDatabase", "Populating database row " + count);
-                    }
+                    // Update progress dialog
                     if (count % 100 == 0) {
+                        if (count % 1000 == 0) {
+                            Log.i("ASRDatabase", "Populating database row " + count);
+                        }
                         publishProgress(count);
                     }
                     count++;
