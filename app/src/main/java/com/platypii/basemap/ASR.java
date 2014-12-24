@@ -14,7 +14,11 @@ class ASR {
     public static void init(Context appContext) {
         // Start the database
         ASRDatabase.start(appContext);
-        ASRDatabase.loadIfEmpty(appContext);
+        ASRFile.start(appContext);
+        ASRDownload.updateAsync();
+        if(ASRDatabase.isReady()) {
+            ASR.ready();
+        }
     }
 
     // Callback for when file loading complete
@@ -24,12 +28,12 @@ class ASR {
     }
 
     // Callback for when database loading complete
-    public static void databaseLoaded() {
+    public static void ready() {
         MapsActivity.updateMap();
     }
 
     public static List<ASRRecord> query(LatLngBounds bounds) {
-        Log.w("ASR", "Querying ASR for " + bounds);
+        Log.w("ASR", "Querying for " + bounds);
         final long startTime = System.nanoTime();
         final List<ASRRecord> results = ASRDatabase.query(bounds.southwest.latitude, bounds.northeast.latitude, bounds.southwest.longitude, bounds.northeast.longitude, LIMIT);
         final double queryTime = (System.nanoTime() - startTime) * 10E-9;

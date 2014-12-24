@@ -16,7 +16,6 @@ class ASRDatabase {
     private static SQLiteDatabase database;
     private static boolean started = false;
     private static boolean loading = false;
-    private static boolean loaded = false;
 
     public static synchronized void start(Context appContext) {
         // Start database
@@ -33,26 +32,32 @@ class ASRDatabase {
         }
     }
 
-    public static synchronized void loadIfEmpty(Context appContext) {
-        // Load data, if necessary
+    /** Return true iff there is data ready to query */
+    public static boolean isReady() {
         if(!started) {
-            Log.e("ASRDatabase", "Attempted to load, but database is not started");
+            Log.i("ASRDatabase", "Not ready: database is not started");
+            return false;
         } else if(loading) {
-            Log.e("ASRDatabase", "Attempted to load, but already loading");
+            Log.i("ASRDatabase", "Not ready: database is loading");
+            return false;
         } else {
-            if (ASRDatabase.isEmpty()) {
-                Log.w("ASRDatabase", "Database is empty, loading from file");
-                loading = true;
-                ASRFile.loadAsync(appContext);
-            } else {
-                loaded = true;
-                ASR.databaseLoaded();
-            }
+            // Return true iff there is data ready to query
+            final int rows = getRows();
+            Log.w("ASRDatabase", "Database ready with " + rows + " rows");
+            return rows > 0;
         }
     }
 
+    private static int getRows() {
+        // Assumes started and not loading
+        final Cursor cursor = database.rawQuery("SELECT COUNT(id) FROM asr", null);
+        cursor.moveToFirst();
+        return cursor.getInt(0);
+    }
+
     public static void loadDataAsync(final Iterator<ASRRecord> asrIterator) {
-        if (started && loading) {
+        if (started && !loading) {
+            loading = true;
             new LoadDataTask(asrIterator).execute();
         } else {
             Log.e("ASRDatabase", "Unexpected load data callback");
@@ -85,6 +90,7 @@ class ASRDatabase {
             database = null;
             final SQLiteDatabase writableDatabase = helper.getWritableDatabase();
             writableDatabase.execSQL("BEGIN TRANSACTION");
+            writableDatabase.execSQL("DELETE FROM asr");
             while (asrIterator.hasNext()) {
                 final ASRRecord record = asrIterator.next();
                 if (record != null) {
@@ -104,7 +110,6 @@ class ASRDatabase {
             writableDatabase.close();
             database = helper.getReadableDatabase();
             loading = false;
-            loaded = true;
             Log.w("ASRDatabase", "Database loaded from file");
             return null;
         }
@@ -118,22 +123,15 @@ class ASRDatabase {
         @Override
         protected void onPostExecute(Void result) {
             MapsActivity.dismissProgress();
-            ASR.databaseLoaded();
+            ASR.ready();
         }
-    }
-
-    private static boolean isEmpty() {
-        final Cursor cursor = database.rawQuery("SELECT COUNT(id) FROM asr", null);
-        cursor.moveToFirst();
-        final int count = cursor.getInt(0);
-        return count == 0;
     }
 
     /**
      * Search for the N tallest towers in view
      */
     public static List<ASRRecord> query(double minLatitude, double maxLatitude, double minLongitude, double maxLongitude, int limit) {
-        if(loaded) {
+        if(started && !loading) {
             final String params[] = {"" + minLatitude, "" + maxLatitude, "" + minLongitude, "" + maxLongitude, "" + limit};
             final String longitudeQuery = (minLongitude <= maxLongitude) ?
                     " AND ? < longitude AND longitude < ?" :

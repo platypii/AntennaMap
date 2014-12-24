@@ -1,28 +1,26 @@
 package com.platypii.basemap;
 
 import android.content.Context;
-import android.os.AsyncTask;
 import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
-import java.net.URL;
+import java.math.BigInteger;
+import java.security.DigestInputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Iterator;
 import java.util.zip.GZIPInputStream;
 
-import javax.net.ssl.HttpsURLConnection;
-
 class ASRFile {
-	private static final String fileUrl = "https://s3-us-west-1.amazonaws.com/platypii.asrdata/asr-min.csv.gz";
-	private static File cacheFile;
+	public static File cacheFile;
 
-    public static void loadAsync(final Context appContext) {
+    public static void start(Context appContext) {
         // Get reference to cache file
         if(cacheFile != null) {
             Log.e("ASRFile", "Already loaded");
@@ -30,69 +28,36 @@ class ASRFile {
             final File cacheDir = appContext.getExternalCacheDir();
             cacheFile = new File(cacheDir, "asr.csv.gz");
         }
-        // Check if the file is cached
-        if(cacheFile.exists()) {
-            ASR.fileLoaded();
+    }
+
+    /** Scan the cache file for length and MD5 */
+    public static String md5() {
+        if (cacheFile == null) {
+            Log.e("ASRFile", "Not initialized");
+            return null;
         } else {
-            // Download ASR file
-            new DownloadTask().execute();
+            try {
+                final MessageDigest md = MessageDigest.getInstance("MD5");
+                final InputStream inputStream = new DigestInputStream(new FileInputStream(cacheFile), md);
+                final byte[] buffer = new byte[1024];
+                while(inputStream.read(buffer) != -1) {
+                    // Do nothing
+                }
+                inputStream.close();
+                // Format digest as hex
+                return String.format("%1$032x", new BigInteger(1, md.digest()));
+            } catch (NoSuchAlgorithmException e) {
+                Log.e("ASRFile", "Failed to compute MD5", e);
+                return null;
+            } catch(IOException e) {
+                Log.e("ASRFile", "Failed to read ASR file", e);
+                return null;
+            }
         }
     }
 
-    private static class DownloadTask extends AsyncTask<Void, Integer, Void> {
-        private int totalSize = -1;
-
-        @Override
-        protected void onPreExecute() {
-            MapsActivity.startProgress("Downloading data...");
-        }
-        @Override
-        protected Void doInBackground(Void... params) {
-            Log.w("ASRFile", "Downloading asr.csv");
-            try {
-                final URL url = new URL(fileUrl);
-
-                Log.w("ASRFile", "Downloading URL: " + url);
-                final HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
-                final InputStream inputStream = urlConnection.getInputStream();
-
-                //this is the total size of the file
-                totalSize = urlConnection.getContentLength();
-                int downloadedSize = 0;
-                publishProgress(0);
-
-                //create a buffer...
-                final byte[] buffer = new byte[1024];
-                int bufferLength = 0; //used to store a temporary size of the buffer
-
-                //now, read through the input buffer and write the contents to the file
-                final FileOutputStream fileOutput = new FileOutputStream(cacheFile);
-                while( (bufferLength = inputStream.read(buffer)) > 0 ) {
-                    //add the data in the buffer to the file in the file output stream (the file on the sd card
-                    fileOutput.write(buffer, 0, bufferLength);
-                    //add up the size so we know how much is downloaded
-                    downloadedSize += bufferLength;
-                    Log.i("ASRFile", "Download progress " + downloadedSize + " / " + totalSize);
-                    publishProgress(downloadedSize);
-                }
-                //close the output stream when done
-                fileOutput.close();
-                Log.w("ASRFile", "Downloaded asr.csv");
-            } catch(IOException e) {
-                Log.e("ASRFile", "Download error: ", e);
-            }
-            return null;
-        }
-        @Override
-        protected void onProgressUpdate(Integer... progress) {
-            super.onProgressUpdate(progress);
-            MapsActivity.updateProgress("Downloading data...", progress[0], totalSize);
-        }
-        @Override
-        protected void onPostExecute(Void result) {
-            MapsActivity.dismissProgress();
-            ASR.fileLoaded();
-        }
+    public static long size() {
+        return cacheFile.length();
     }
 
     public static int rowCount() {
