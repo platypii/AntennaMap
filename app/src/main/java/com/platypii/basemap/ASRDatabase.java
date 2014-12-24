@@ -67,6 +67,7 @@ class ASRDatabase {
     private static class LoadDataTask extends AsyncTask<Void, Integer, Void> {
         private final Iterator<ASRRecord> asrIterator;
         private int totalSize = -1;
+        private static final int GROUP_BY = 40;
 
         LoadDataTask(Iterator<ASRRecord> asrIterator) {
             this.asrIterator = asrIterator;
@@ -80,14 +81,16 @@ class ASRDatabase {
         @Override
         protected Void doInBackground(Void... params) {
             Log.w("ASRDatabase", "Loading database");
-            // Get row count (TODO: Slow!)
+            // Get row count
             totalSize = ASRFile.rowCount();
+            Log.w("ASRDatabase", "Rows: " + totalSize);
             int count = 0;
             publishProgress(0);
 
             // Write to database
             database.close();
             database = null;
+            final StringBuilder sb = new StringBuilder();
             final SQLiteDatabase writableDatabase = helper.getWritableDatabase();
             writableDatabase.execSQL("BEGIN TRANSACTION");
             writableDatabase.execSQL("DELETE FROM asr");
@@ -95,7 +98,27 @@ class ASRDatabase {
                 final ASRRecord record = asrIterator.next();
                 if (record != null) {
                     // Add to database
-                    writableDatabase.execSQL("INSERT OR IGNORE INTO asr VALUES (" + record.id + "," + record.latitude + "," + record.longitude + "," + record.height + ")");
+                    // writableDatabase.execSQL("INSERT OR IGNORE INTO asr VALUES (" + record.id + "," + record.latitude + "," + record.longitude + "," + record.height + ")");
+                    // Send query in batches
+                    if(count % GROUP_BY == 0) {
+                        sb.append("INSERT OR IGNORE INTO asr VALUES\n");
+                    } else {
+                        sb.append(",\n");
+                    }
+                    sb.append(" (");
+                    sb.append(record.id);
+                    sb.append(',');
+                    sb.append(record.latitude);
+                    sb.append(',');
+                    sb.append(record.longitude);
+                    sb.append(',');
+                    sb.append(record.height);
+                    sb.append(')');
+                    // Send query in batches
+                    if(count % GROUP_BY == GROUP_BY - 1) {
+                        writableDatabase.execSQL(sb.toString());
+                        sb.setLength(0);
+                    }
                     // Update progress dialog
                     if (count % 100 == 0) {
                         if (count % 1000 == 0) {
@@ -105,6 +128,9 @@ class ASRDatabase {
                     }
                     count++;
                 }
+            }
+            if(sb.length() > 0) {
+                writableDatabase.execSQL(sb.toString());
             }
             writableDatabase.execSQL("COMMIT");
             writableDatabase.close();

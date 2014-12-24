@@ -9,7 +9,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.LineNumberReader;
 import java.math.BigInteger;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
@@ -67,11 +66,19 @@ class ASRFile {
         } else {
             // Count rows in cache file
             try {
-                final LineNumberReader lineNumberReader = new LineNumberReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(cacheFile))));
-                lineNumberReader.skip(Long.MAX_VALUE);
-                final int lines = lineNumberReader.getLineNumber();
-                lineNumberReader.close();
-                return lines;
+                final InputStream inputStream = new GZIPInputStream(new FileInputStream(cacheFile));
+                final byte[] buffer = new byte[4096];
+                int bufferLength;
+                int count = 0;
+                while((bufferLength = inputStream.read(buffer)) != -1) {
+                    for(int i = 0; i < bufferLength; i++) {
+                        if(buffer[i] == '\n') {
+                            count++;
+                        }
+                    }
+                }
+                inputStream.close();
+                return count;
             } catch(IOException e) {
                 Log.e("ASRFile", "Failed to read ASR file", e);
                 return -1;

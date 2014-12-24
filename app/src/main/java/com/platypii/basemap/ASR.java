@@ -9,7 +9,7 @@ import java.util.List;
 
 class ASR {
 
-	private static final int LIMIT = 18;
+	private static final int LIMIT = 20;
 
     public static void init(Context appContext) {
         // Start the database

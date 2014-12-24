@@ -11,7 +11,7 @@ import java.net.URL;
 import javax.net.ssl.HttpsURLConnection;
 
 class ASRDownload {
-	private static final String fileUrl = "https://s3-us-west-1.amazonaws.com/platypii.asrdata/asr-min.csv.gz";
+	private static final String fileUrl = "https://s3-us-west-1.amazonaws.com/platypii.asrdata/asr.csv.gz";
 
     public static void updateAsync() {
         if(ASRFile.cacheFile == null) {
@@ -107,7 +107,7 @@ class ASRDownload {
                 final HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
                 final InputStream inputStream = urlConnection.getInputStream();
 
-                //this is the total size of the file
+                // the total size of the file
                 totalSize = urlConnection.getContentLength();
                 int downloadedSize = 0;
                 publishProgress(0);
@@ -126,7 +126,6 @@ class ASRDownload {
                     // Log.d("ASRDownload", "Download progress " + downloadedSize + " / " + totalSize);
                     publishProgress(downloadedSize);
                 }
-                //close the output stream when done
                 fileOutput.close();
                 Log.w("ASRDownload", "Downloaded asr.csv");
             } catch(IOException e) {
