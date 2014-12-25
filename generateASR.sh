@@ -17,6 +17,7 @@ echo 'ID,Latitude,Longitude,Height' > asr-tmp.csv
 # $16: Longitude
 # $24: T=Terminated, G=Granted, C=Constructed, A=Cancelled, I=Dismantled
 # $46: Height
+# $48: GTOWER / LTOWER / MAST / MTOWER / POLE / TANK / TOWER
 awk -F'|' '{ if($24 == "C" && $11 != "" && $16 != "" && $16 != "0.0") print $5 "," $11 "," $16 "," $46 }' asr-full.csv | sort -t',' -k4 -r -g >> asr-tmp.csv
 
 # Remove dups and trim
@@ -26,5 +27,5 @@ awk -F',' '{ if(a[$1]++ == 0 && $4 >= 60.9) print }' asr-tmp.csv > asr.csv
 gzip -c asr.csv > asr.csv.gz
 
 # Upload to S3
-s3cmd put asr.csv.gz s3://platypii.asrdata
-s3cmd setacl --acl-public s3://platypii.asrdata/asr.csv.gz
+s3cmd put asr.csv.gz s3://platypii/asr/
+s3cmd setacl --acl-public s3://platypii/asr/asr.csv.gz

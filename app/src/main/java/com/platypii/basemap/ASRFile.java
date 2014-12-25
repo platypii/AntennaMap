@@ -135,7 +135,7 @@ class ASRFile {
     private static ASRRecord parseLine(String line) {
         final String[] split = line.split(",");
         if(split.length < 4 || split[0].equals("") || split[1].equals("") || split[2].equals("") || split[3].equals("")) {
-            Log.i("ASRFile", "Failed to parse line " + line);
+            Log.w("ASRFile", "Failed to parse line " + line);
             return null;
         }
         try {

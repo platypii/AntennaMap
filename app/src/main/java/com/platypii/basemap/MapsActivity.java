@@ -110,6 +110,7 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnCamera
             } else {
                 home = new LatLng(47.61, -122.34);
             }
+            Log.w("Map", "Centering map on " + home);
             map.animateCamera(CameraUpdateFactory.newLatLngZoom(home, 9));
             firstLoad = false;
         }
@@ -137,7 +138,11 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnCamera
             myLocation = lm.getLastKnownLocation(provider);
         }
 
-        return myLocation;
+        if(Math.abs(myLocation.getLatitude()) < 0.01 && Math.abs(myLocation.getLongitude()) < 0.01) {
+            return null;
+        } else {
+            return myLocation;
+        }
     }
 
     // Drag listener

@@ -11,7 +11,7 @@ import java.net.URL;
 import javax.net.ssl.HttpsURLConnection;
 
 class ASRDownload {
-	private static final String fileUrl = "https://s3-us-west-1.amazonaws.com/platypii.asrdata/asr.csv.gz";
+	private static final String fileUrl = "https://platypii.s3.amazonaws.com/asr/asr.csv.gz";
 
     public static void updateAsync() {
         if(ASRFile.cacheFile == null) {
