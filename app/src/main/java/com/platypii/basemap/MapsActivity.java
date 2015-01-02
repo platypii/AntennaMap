@@ -104,14 +104,18 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnCamera
         map.setMyLocationEnabled(true);
         if(firstLoad) {
             final Location myLocation = getMyLocation();
-            LatLng home;
-            if (myLocation != null) {
-                home = new LatLng(myLocation.getLatitude(), myLocation.getLongitude());
+            if (myLocation != null
+                    && 8 < myLocation.getLatitude() && myLocation.getLatitude() < 76
+                    && -170 < myLocation.getLongitude() && myLocation.getLongitude() < -60) {
+                final LatLng home = new LatLng(myLocation.getLatitude(), myLocation.getLongitude());
+                Log.w("Map", "Centering map on " + home);
+                map.animateCamera(CameraUpdateFactory.newLatLngZoom(home, 8));
             } else {
-                home = new LatLng(47.61, -122.34);
+                // final LatLng seattle = new LatLng(47.61, -122.34);
+                final LatLng usa = new LatLng(41.2, -120.5);
+                Log.w("Map", "Centering map on default view " + usa);
+                map.animateCamera(CameraUpdateFactory.newLatLngZoom(usa, 5));
             }
-            Log.w("Map", "Centering map on " + home);
-            map.animateCamera(CameraUpdateFactory.newLatLngZoom(home, 9));
             firstLoad = false;
         }
 
@@ -139,6 +143,7 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnCamera
         }
 
         if(Math.abs(myLocation.getLatitude()) < 0.01 && Math.abs(myLocation.getLongitude()) < 0.01) {
+            // Unlikely coordinate
             return null;
         } else {
             return myLocation;

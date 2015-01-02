@@ -141,7 +141,7 @@ class ASRFile {
         try {
             final long id = Long.parseLong(split[0]);
             final double latitude = Double.parseDouble(split[1]) / 3600.0;
-            final double longitude = - Double.parseDouble(split[2]) / 3600.0;
+            final double longitude = Double.parseDouble(split[2]) / -3600.0;
             final double height = Double.parseDouble(split[3]);
             return new ASRRecord(id, latitude, longitude, height);
         } catch(Exception e) {
