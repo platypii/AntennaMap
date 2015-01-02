@@ -13,12 +13,13 @@ echo 'ID,Latitude,Longitude,Height' > asr-tmp.csv
 # cut -d'|' -f 5,11,16,46,24 asr.csv | sort -t'|' -k4 -r -g | sed 's/|/,/g' | uniq | head -111475 >> asr-min.csv
 
 # $5: Unique System Identifier
+# $6: Coordinate Type, A=Array, T=Tower
 # $11: Latitude
 # $16: Longitude
 # $24: T=Terminated, G=Granted, C=Constructed, A=Cancelled, I=Dismantled
 # $46: Height
 # $48: GTOWER / LTOWER / MAST / MTOWER / POLE / TANK / TOWER
-awk -F'|' '{ if($24 == "C" && $11 != "" && $16 != "" && $16 != "0.0") print $5 "," $11 "," $16 "," $46 }' asr-full.csv | sort -t',' -k4 -r -g >> asr-tmp.csv
+awk -F'|' '{ if($6 == "T" && $24 == "C" && $11 != "" && $16 != "" && $16 != "0.0") print $5 "," $11 "," $16 "," $46 }' asr-full.csv | sort -t',' -k4 -r -g >> asr-tmp.csv
 
 # Remove dups and trim
 awk -F',' '{ if(a[$1]++ == 0 && $4 >= 60.9) print }' asr-tmp.csv > asr.csv
