@@ -53,7 +53,9 @@ class ASRDatabase {
         // Assumes started and not loading
         final Cursor cursor = database.rawQuery("SELECT COUNT(id) FROM asr", null);
         cursor.moveToFirst();
-        return cursor.getInt(0);
+        final int rows = cursor.getInt(0);
+        cursor.close();
+        return rows;
     }
 
     public static void loadDataAsync(final Iterator<ASRRecord> asrIterator) {
@@ -159,6 +161,7 @@ class ASRDatabase {
                 final ASRRecord record = new ASRRecord(id, latitude, longitude, height);
                 records.add(record);
             }
+            cursor.close();
             return records;
         } else if(loading) {
             Log.w("ASRDatabase", "Query attempted while still loading");
