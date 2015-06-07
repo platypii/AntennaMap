@@ -115,7 +115,7 @@ class ASRDownload {
 
                 // create a buffer...
                 final byte[] buffer = new byte[1024];
-                int bufferLength = 0; // used to store a temporary size of the buffer
+                int bufferLength; // used to store a temporary size of the buffer
 
                 // now, read through the input buffer and write the contents to the file
                 final FileOutputStream fileOutput = new FileOutputStream(ASRFile.cacheFile);

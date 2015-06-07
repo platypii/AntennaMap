@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.support.v4.content.ContextCompat;
 
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -19,10 +20,14 @@ class Assets {
         if(sizedIcons[index] == null) {
             // Generate icon
             final int size = 40 + index * 16;
-            final Drawable drawable = context.getResources().getDrawable(R.drawable.tower_yellow);
-            final Bitmap bitmap = ((BitmapDrawable)(drawable)).getBitmap();
-            final Bitmap bitmapScaled = Bitmap.createScaledBitmap(bitmap, size, size, false);
-            sizedIcons[index] = BitmapDescriptorFactory.fromBitmap(bitmapScaled);
+            final Drawable drawable = ContextCompat.getDrawable(context, R.drawable.tower_yellow);
+            if(drawable != null) {
+                final Bitmap bitmap = ((BitmapDrawable) (drawable)).getBitmap();
+                final Bitmap bitmapScaled = Bitmap.createScaledBitmap(bitmap, size, size, false);
+                sizedIcons[index] = BitmapDescriptorFactory.fromBitmap(bitmapScaled);
+            } else {
+                return null; // Should never happen
+            }
         }
         return sizedIcons[index];
     }
