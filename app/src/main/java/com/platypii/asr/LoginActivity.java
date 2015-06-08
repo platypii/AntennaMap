@@ -1,11 +1,9 @@
-package com.platypii.basemap;
+package com.platypii.asr;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.widget.EditText;
@@ -77,9 +75,7 @@ public class LoginActivity extends Activity {
             mAuthTask = null;
             if(success) {
                 // Update preferences
-                final SharedPreferences.Editor editor = LoginActivity.this.getSharedPreferences("baseline", Context.MODE_PRIVATE).edit();
-                editor.putBoolean("basemap_authenticated", true);
-                editor.apply();
+                Auth.setAuthenticated(LoginActivity.this);
                 // Start Main Activity
                 final Intent intent = new Intent(LoginActivity.this, MapsActivity.class);
                 finish();

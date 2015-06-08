@@ -1,4 +1,4 @@
-package com.platypii.basemap;
+package com.platypii.asr;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -15,10 +15,18 @@ import java.net.URL;
  */
 class Auth {
 
+    private static final String AUTH_KEY = "is_authenticated";
+
     public static boolean checkAuth(Context context) {
         // Check if user has authenticated
         final SharedPreferences prefs = context.getSharedPreferences("baseline", Context.MODE_PRIVATE);
-        return prefs.getBoolean("basemap_authenticated", false);
+        return prefs.getBoolean(AUTH_KEY, false);
+    }
+    public static void setAuthenticated(Context context) {
+        // Update preferences
+        final SharedPreferences.Editor editor = context.getSharedPreferences("baseline", Context.MODE_PRIVATE).edit();
+        editor.putBoolean(Auth.AUTH_KEY, true);
+        editor.apply();
     }
 
     /** Validate against baseline server */

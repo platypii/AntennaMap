@@ -1,4 +1,4 @@
-package com.platypii.basemap;
+package com.platypii.asr;
 
 import com.google.android.gms.maps.model.LatLng;
 

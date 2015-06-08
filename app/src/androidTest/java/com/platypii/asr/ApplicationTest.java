@@ -1,4 +1,4 @@
-package com.platypii.basemap;
+package com.platypii.asr;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;
