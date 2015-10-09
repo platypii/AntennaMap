@@ -1,13 +1,15 @@
 #!/bin/bash
 
+# Download and unzip raw FCC data from: http://wireless.fcc.gov/uls/data/complete/r_tower.zip
+
 OUTPUT_FILE=asr-dev.csv
 
 export LC_ALL=C
 
 echo 'Registration Number|Record Type|Content Indicator|File Number|Unique System Identifier|Coordinate Type|Latitude Degrees|Latitude Minutes|Latitude Seconds|Latitude Direction|Latitude_Total_Seconds|Longitude Degrees|Longitude Minutes|Longitude Seconds|Longitude Direction|Longitude_Total_Seconds|Record Type|Content Indicator|File Number|Unique System Identifier|Application Purpose|Previous Purpose|Input Source Code|Status Code|Date Entered|Date Received|Date Issued|Date Constructed|Date Dismantled|Date Action|Archive Flag Code|Version|Signature First Name|Signature Middle Initial|Signature Last Name|Signature Suffix|Signature Title|Invalid Signature|Structure_Street Address|Structure_City|Structure_State Code|||Height of Structure|Ground Elevation|Overall Height Above Ground|Overall Height AMSL|Structure Type|Date FAA Determination Issued|FAA Study Number|FAA Circular Number|Specification Option|Painting and Lighting|FAA EMI Flag|NEPA Flag' > asr-full.csv
 
-# sort -t'|' -k4 CO.dat > CO-sorted.dat
-# sort -t'|' -k4 RA.dat > RA-sorted.dat
+sort -t'|' -k4 CO.dat > CO-sorted.dat
+sort -t'|' -k4 RA.dat > RA-sorted.dat
 
 join -t'|' -1 4 -2 4 CO-sorted.dat RA-sorted.dat | sed 's/||\r//g' >> asr-full.csv
 
