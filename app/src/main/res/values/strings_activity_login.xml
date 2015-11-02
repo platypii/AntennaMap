@@ -1,8 +1,0 @@
-<resources>
-    <string name="title_activity_login">BaseMap</string>
-
-    <string name="password_prompt">Enter Password</string>
-
-    <string name="error_password_required">Password required</string>
-    <string name="error_password_invalid">Invalid password</string>
-</resources>
