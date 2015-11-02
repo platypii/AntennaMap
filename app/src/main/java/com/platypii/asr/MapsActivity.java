@@ -128,9 +128,15 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnCamera
 
     /** Gets the users most recent location */
     private Location getMyLocation() {
+        Location myLocation = null;
+
         // Get location from GPS if it's available
         final LocationManager lm = (LocationManager)getSystemService(LOCATION_SERVICE);
-        Location myLocation = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        try {
+            myLocation = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        } catch(SecurityException e) {
+            Log.w("Map", "Permission denied for GPS location");
+        }
 
         // Location wasn't found, check the next most accurate place for the current location
         if (myLocation == null) {
@@ -139,10 +145,16 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnCamera
             // Finds a provider that matches the criteria
             final String provider = lm.getBestProvider(criteria, true);
             // Use the provider to get the last known location
-            myLocation = lm.getLastKnownLocation(provider);
+            try {
+                myLocation = lm.getLastKnownLocation(provider);
+            } catch(SecurityException e) {
+                Log.w("Map", "Permission denied for GPS location");
+            }
         }
 
-        if(Math.abs(myLocation.getLatitude()) < 0.01 && Math.abs(myLocation.getLongitude()) < 0.01) {
+        if(myLocation == null) {
+            return null;
+        } else if(Math.abs(myLocation.getLatitude()) < 0.01 && Math.abs(myLocation.getLongitude()) < 0.01) {
             // Unlikely coordinate
             return null;
         } else {
