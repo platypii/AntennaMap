@@ -54,7 +54,7 @@ class ASRDownload {
 
                 // Check size and eTag
                 final int remoteSize = connection.getContentLength();
-                final String remoteTag = connection.getHeaderField("ETag").replaceAll("\"", "");
+                final String remoteTag = connection.getHeaderField("ETag").replace("\"", "");
 
                 Log.i("ASRDownload", "Remote: size = " + remoteSize + ", eTag = " + remoteTag);
 

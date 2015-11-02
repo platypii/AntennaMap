@@ -143,7 +143,13 @@ class ASRDatabase {
      */
     public static List<ASRRecord> query(double minLatitude, double maxLatitude, double minLongitude, double maxLongitude, int limit) {
         if(started && !loading) {
-            final String params[] = {"" + minLatitude, "" + maxLatitude, "" + minLongitude, "" + maxLongitude, "" + limit};
+            final String params[] = {
+                    Double.toString(minLatitude),
+                    Double.toString(maxLatitude),
+                    Double.toString(minLongitude),
+                    Double.toString(maxLongitude),
+                    Integer.toString(limit)
+            };
             final String longitudeQuery = (minLongitude <= maxLongitude) ?
                     " AND ? < longitude AND longitude < ?" :
                     " AND ? < longitude OR longitude < ?";

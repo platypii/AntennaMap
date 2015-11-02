@@ -38,7 +38,7 @@ class ASR {
         final List<ASRRecord> results = ASRDatabase.query(bounds.southwest.latitude, bounds.northeast.latitude, bounds.southwest.longitude, bounds.northeast.longitude, LIMIT);
         final double queryTime = (System.nanoTime() - startTime) * 10E-9;
         if(results != null) {
-            Log.w("ASR", "Query returned " + results.size() + " results (" + String.format("%.3f", queryTime) + "s)");
+            Log.w("ASR", String.format("Query returned %d results (%.3fs)", results.size(), queryTime));
         } else {
             Log.e("ASR", "Query returned null!");
         }
