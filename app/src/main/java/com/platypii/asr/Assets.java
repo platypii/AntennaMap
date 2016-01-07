@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.support.v4.content.ContextCompat;
 
 import com.google.android.gms.maps.model.BitmapDescriptor;
@@ -20,9 +21,12 @@ class Assets {
         if(sizedIcons[index] == null) {
             // Generate icon
             final int size = 40 + index * 16;
-            final Drawable drawable = ContextCompat.getDrawable(context, R.drawable.tower_yellow);
+            final Drawable drawable = ContextCompat.getDrawable(context, R.mipmap.ic_launcher);
             if(drawable != null) {
                 final Bitmap bitmap = ((BitmapDrawable) (drawable)).getBitmap();
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                    bitmap.setHasMipMap(true);
+                }
                 final Bitmap bitmapScaled = Bitmap.createScaledBitmap(bitmap, size, size, false);
                 sizedIcons[index] = BitmapDescriptorFactory.fromBitmap(bitmapScaled);
             } else {
