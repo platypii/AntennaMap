@@ -19,6 +19,9 @@ import java.util.zip.GZIPInputStream;
 class ASRFile {
 	public static File cacheFile;
 
+    // Flag to indicate that cache file was loaded from resources, and needs to be reloaded
+    public static boolean reloadRequired = false;
+
     public static void start(Context appContext) {
         // Get reference to cache file
         if(cacheFile != null) {
@@ -26,6 +29,19 @@ class ASRFile {
         } else {
             final File cacheDir = appContext.getExternalCacheDir();
             cacheFile = new File(cacheDir, "asr.csv.gz");
+            // Check if file exists
+            if(!cacheFile.exists()) {
+                // Fresh install, load default file from resources
+                Log.w("ASRFile", "Cache file does not exist, using default");
+                try {
+                    final InputStream defaultCacheFile = appContext.getResources().openRawResource(R.raw.asr_csv_gz);
+                    Util.copy(defaultCacheFile, cacheFile);
+                    reloadRequired = true;
+                    Log.i("ASRFile", "Copied default cache file from resources");
+                } catch (IOException e) {
+                    Log.e("ASRFile", "Error copying default cache file from resources", e);
+                }
+            }
         }
     }
 

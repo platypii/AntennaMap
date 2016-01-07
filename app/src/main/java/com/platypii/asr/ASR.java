@@ -25,6 +25,7 @@ class ASR {
     public static void fileLoaded() {
         // Load file into database
         ASRDatabase.loadDataAsync(ASRFile.iterator());
+        ASRFile.reloadRequired = false;
     }
 
     // Callback for when database loading complete

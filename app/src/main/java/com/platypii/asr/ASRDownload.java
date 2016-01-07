@@ -14,31 +14,22 @@ class ASRDownload {
     private static final String fileUrl = "https://platypii.s3.amazonaws.com/asr/v1/asr.csv.gz";
     // private static final String fileUrl = "https://platypii.s3.amazonaws.com/asr/v1/asr-dev.csv.gz";
 
+    /** Check for new ASR file, and if necessary, download and reload new data */
     public static void updateAsync() {
-        if(ASRFile.cacheFile == null) {
-            Log.e("ASRDownload", "Download failed: cache file not initialized");
-        } else if(ASRFile.cacheFile.exists()) {
-            Log.w("ASRDownload", "Checking for latest ASR file");
-            // Check for newer version in S3
-            new CheckETagTask().execute();
+        if(ASRFile.cacheFile != null) {
+            if(ASRFile.cacheFile.exists()) {
+                Log.w("ASRDownload", "Checking for latest ASR file");
+                // Check for newer version in S3
+                new CheckETagTask().execute();
+            } else {
+                Log.e("ASRDownload", "Cache file not found");
+                // Should already exist, or copied from resources on first run, oh well let's try to download:
+                new DownloadTask().execute();
+            }
         } else {
-            Log.w("ASRDownload", "Cache file not found");
-            ASRDownload.downloadAsync();
+            Log.e("ASRDownload", "Download failed: cache file not initialized");
         }
         Log.i("ASRDownload", "Returning from updateAsync()");
-    }
-
-    /** Download ASR file */
-    private static void downloadAsync() {
-        // Get reference to cache file
-        if(ASRFile.cacheFile == null) {
-            Log.e("ASRFile", "Download failed: cache file not initialized");
-        } else {
-            Log.w("ASRFile", "Downloading latest ASR file");
-            // Download ASR file from S3
-            new DownloadTask().execute();
-        }
-        Log.i("ASRDownload", "Returning from downloadAsync()");
     }
 
     private static class CheckETagTask extends AsyncTask<Void, Integer, Boolean> {
@@ -89,13 +80,17 @@ class ASRDownload {
         @Override
         protected void onPostExecute(Boolean eTagMatches) {
             if(eTagMatches != null && !eTagMatches) {
+                // Newer version available for download
                 Log.w("ASRDownload", "New ASR file found");
-                ASRDownload.downloadAsync();
+                new DownloadTask().execute();
+            } else if(ASRFile.reloadRequired) {
+                // Latest version already downloaded, but reload required
+                ASR.fileLoaded();
             }
         }
     }
 
-    private static class DownloadTask extends AsyncTask<Void, Integer, Void> {
+    private static class DownloadTask extends AsyncTask<Void, Integer, Boolean> {
         private int totalSize = -1;
 
         @Override
@@ -103,7 +98,7 @@ class ASRDownload {
             MapsActivity.startProgress("Downloading data...");
         }
         @Override
-        protected Void doInBackground(Void... params) {
+        protected Boolean doInBackground(Void... params) {
             try {
                 final URL url = new URL(fileUrl);
 
@@ -132,10 +127,11 @@ class ASRDownload {
                 }
                 fileOutput.close();
                 Log.w("ASRDownload", "Downloaded asr.csv");
+                return true;
             } catch(IOException e) {
-                Log.e("ASRDownload", "Download error: ", e);
+                Log.e("ASRDownload", "Download failed: ", e);
+                return false;
             }
-            return null;
         }
         @Override
         protected void onProgressUpdate(Integer... progress) {
@@ -143,9 +139,11 @@ class ASRDownload {
             MapsActivity.updateProgress("Downloading data...", progress[0], totalSize);
         }
         @Override
-        protected void onPostExecute(Void result) {
+        protected void onPostExecute(Boolean success) {
             MapsActivity.dismissProgress();
-            ASR.fileLoaded();
+            if(success) {
+                ASR.fileLoaded();
+            }
         }
     }
 

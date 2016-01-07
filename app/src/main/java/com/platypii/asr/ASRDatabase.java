@@ -82,7 +82,7 @@ class ASRDatabase {
 
         @Override
         protected Void doInBackground(Void... params) {
-            Log.w("ASRDatabase", "Loading database");
+            Log.w("ASRDatabase", "Loading database from cache file");
             // Get row count
             totalSize = ASRFile.rowCount();
             Log.w("ASRDatabase", "Rows: " + totalSize);
