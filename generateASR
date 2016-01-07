@@ -1,8 +1,10 @@
 #!/bin/bash
 
 # Download and unzip raw FCC data from: http://wireless.fcc.gov/uls/data/complete/r_tower.zip
+# wget http://wireless.fcc.gov/uls/data/complete/r_tower.zip
+# unzip r_tower.zip CO.dat RA.dat
 
-OUTPUT_FILE=asr-dev.csv
+OUTPUT_FILE=asr.csv
 
 export LC_ALL=C
 
@@ -18,12 +20,28 @@ echo 'ID,Latitude,Longitude,Height' > asr-tmp.csv
 
 # $5: Unique System Identifier
 # $6: Coordinate Type, A=Array, T=Tower
+# $10: Latitude Direction
 # $11: Latitude
+# $15: Longitude Direction
 # $16: Longitude
 # $24: T=Terminated, G=Granted, C=Constructed, A=Cancelled, I=Dismantled
 # $46: Height
 # $48: GTOWER / LTOWER=LatticeTower / MAST / MTOWER / POLE / TANK / TOWER
-awk -F'|' '{ if($6 == "T" && $24 == "C" && $11 != "" && $16 != "" && $16 != "0.0") print $5 "," $11 "," $16 "," $46 }' asr-full.csv | sort -t',' -k4 -r -g >> asr-tmp.csv
+awk -F'|' '{
+    if($6 == "T" && $24 == "C" && $11 != "" && $16 != "" && $16 != "0.0") {
+        printf("%s,", $5);
+        if($10 == "N")
+            printf("%s",$11);
+        else
+            printf("-%s",$11);
+        printf ",";
+        if($15 == "W")
+            printf("-%s",$16);
+        else
+            printf("%s",$16);
+        print "," $46;
+    }
+}' asr-full.csv | sort -t',' -k4 -r -g >> asr-tmp.csv
 
 # Remove dups and trim
 awk -F',' '{ if(a[$1]++ == 0 && $4 >= 60.9) print }' asr-tmp.csv > $OUTPUT_FILE
@@ -32,5 +50,5 @@ awk -F',' '{ if(a[$1]++ == 0 && $4 >= 60.9) print }' asr-tmp.csv > $OUTPUT_FILE
 gzip -c $OUTPUT_FILE > $OUTPUT_FILE.gz
 
 # Upload to S3
-#s3cmd put $OUTPUT_FILE.gz s3://platypii/asr/
-#s3cmd setacl --acl-public s3://platypii/asr/$OUTPUT_FILE.gz
+s3cmd put $OUTPUT_FILE.gz s3://platypii/asr/v1/
+s3cmd setacl --acl-public s3://platypii/asr/v1/$OUTPUT_FILE.gz
