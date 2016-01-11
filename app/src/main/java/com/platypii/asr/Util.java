@@ -1,14 +1,11 @@
 package com.platypii.asr;
 
-import android.renderscript.ScriptGroup;
-import android.util.Log;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class Util {
+class Util {
 
     public static void copy(InputStream inputStream, File outputFile) throws IOException {
         // create a buffer...

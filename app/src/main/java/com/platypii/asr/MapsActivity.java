@@ -1,7 +1,9 @@
 package com.platypii.asr;
 
+import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
@@ -9,6 +11,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.widget.ProgressBar;
@@ -40,6 +43,8 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnCamera
     private ProgressBar progressSpinner;
 
     private static boolean firstLoad = true;
+
+    private static final int MY_PERMISSIONS_REQUEST_LOCATION = 3334;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,7 +84,18 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnCamera
     public void onMapReady(GoogleMap map) {
         this.map = map;
         map.setMapType(GoogleMap.MAP_TYPE_HYBRID);
-        map.setMyLocationEnabled(true);
+        if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            // Enable location on map
+            try {
+                map.setMyLocationEnabled(true);
+            } catch(SecurityException e) {
+                Log.e("Map", "Error enabling location", e);
+            }
+        } else {
+            // request the missing permissions
+            final String[] permissions = {Manifest.permission.ACCESS_FINE_LOCATION};
+            ActivityCompat.requestPermissions(this, permissions, MY_PERMISSIONS_REQUEST_LOCATION);
+        }
         if (firstLoad) {
             final Location myLocation = getMyLocation();
             if (myLocation != null
@@ -102,6 +118,23 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnCamera
         map.setOnInfoWindowClickListener(this);
 
         Log.w("Map", "Map ready");
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        if(requestCode == MY_PERMISSIONS_REQUEST_LOCATION) {
+            if(grantResults.length == 1 &&
+                    permissions[0] == Manifest.permission.ACCESS_FINE_LOCATION &&
+                    grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if(map != null) {
+                    try {
+                        map.setMyLocationEnabled(true);
+                    } catch(SecurityException e) {
+                        Log.e("Map", "Error enabling location", e);
+                    }
+                }
+            }
+        }
     }
 
     /** Gets the users most recent location */
