@@ -11,9 +11,15 @@ class ASR {
 
 	private static final int LIMIT = 20;
 
+    // Flag to indicate that cache file was loaded from resources, and needs to be reloaded
+    public static boolean reloadRequired = false;
+
     public static void init(Context appContext) {
         // Start the database
         ASRDatabase.start(appContext);
+        if(!ASRDatabase.isReady()) {
+            reloadRequired = true;
+        }
         ASRFile.start(appContext);
         ASRDownload.updateAsync();
         if(ASRDatabase.isReady()) {
@@ -25,7 +31,7 @@ class ASR {
     public static void fileLoaded() {
         // Load file into database
         ASRDatabase.loadDataAsync(ASRFile.iterator());
-        ASRFile.reloadRequired = false;
+        reloadRequired = false;
     }
 
     // Callback for when database loading complete

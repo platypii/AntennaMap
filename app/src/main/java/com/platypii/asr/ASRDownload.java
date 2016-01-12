@@ -83,7 +83,7 @@ class ASRDownload {
                 // Newer version available for download
                 Log.w("ASRDownload", "New ASR file found");
                 new DownloadTask().execute();
-            } else if(ASRFile.reloadRequired) {
+            } else if(ASR.reloadRequired) {
                 // Latest version already downloaded, but reload required
                 ASR.fileLoaded();
             }
