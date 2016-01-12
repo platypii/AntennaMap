@@ -44,7 +44,7 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnCamera
 
     private static boolean firstLoad = true;
 
-    private static final int MY_PERMISSIONS_REQUEST_LOCATION = 3334;
+    private static final int MY_PERMISSIONS_REQUEST_LOCATION = 64;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -155,11 +155,15 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnCamera
             criteria.setAccuracy(Criteria.ACCURACY_COARSE);
             // Finds a provider that matches the criteria
             final String provider = lm.getBestProvider(criteria, true);
-            // Use the provider to get the last known location
-            try {
-                myLocation = lm.getLastKnownLocation(provider);
-            } catch(SecurityException e) {
-                Log.w("Map", "Permission denied for GPS location");
+            if(provider != null) {
+                // Use the provider to get the last known location
+                try {
+                    myLocation = lm.getLastKnownLocation(provider);
+                } catch (SecurityException e) {
+                    Log.w("Map", "Permission denied for GPS location");
+                }
+            } else {
+                Log.w("Map", "No location provider found");
             }
         }
 
