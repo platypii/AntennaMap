@@ -5,9 +5,11 @@ Antenna Map
  */
 
 (function() {
-  var addMarker, algorithmiaClient, boundsChanged, closeAllMarkers, icons, init, lastChange, lastQuery, map, markers, meters2feet, query, querying, updateMap;
+  var addMarker, algorithmiaClient, boundsChanged, closeAllMarkers, geoMarker, icons, init, lastChange, lastQuery, map, markers, meters2feet, query, querying, updateMap;
 
   map = null;
+
+  geoMarker = null;
 
   markers = {};
 
@@ -34,6 +36,17 @@ Antenna Map
         mapTypeId: google.maps.MapTypeId.HYBRID
       };
       map = new google.maps.Map(document.getElementById('map'), mapOptions);
+      if (navigator.geolocation) {
+        geoMarker = new GeolocationMarker;
+        google.maps.event.addListenerOnce(geoMarker, 'position_changed', function() {
+          map.setZoom(11);
+          map.setCenter(this.getPosition());
+        });
+        google.maps.event.addListener(geoMarker, 'geolocation_error', function(e) {
+          alert('There was an error obtaining your position.\n\nMessage: ' + e.message);
+        });
+        geoMarker.setMap(map);
+      }
       map.addListener('bounds_changed', boundsChanged);
       map.addListener('click', closeAllMarkers);
     });
