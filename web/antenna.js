@@ -24,10 +24,11 @@ Antenna Map
   icons = ["icons/A-16.png", "icons/A-20.png", "icons/A-24.png", "icons/A-28.png", "icons/A-32.png", "icons/A-36.png", "icons/A-40.png"];
 
   init = function() {
-    var center_lat, center_lon, zoom;
+    var center_lat, center_lon, geoZoom, zoom;
     center_lat = 39;
     center_lon = -100;
     zoom = 5;
+    geoZoom = 11;
     google.maps.event.addDomListener(window, 'load', function() {
       var mapOptions;
       mapOptions = {
@@ -39,7 +40,7 @@ Antenna Map
       if (navigator.geolocation) {
         geoMarker = new GeolocationMarker;
         google.maps.event.addListenerOnce(geoMarker, 'position_changed', function() {
-          map.setZoom(11);
+          map.setZoom(geoZoom);
           map.setCenter(this.getPosition());
         });
         google.maps.event.addListener(geoMarker, 'geolocation_error', function(e) {

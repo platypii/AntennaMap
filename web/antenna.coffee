@@ -30,6 +30,7 @@ init = ->
     center_lat = 39
     center_lon = -100
     zoom = 5
+    geoZoom = 11
     google.maps.event.addDomListener window, 'load', ->
         mapOptions =
             zoom: zoom
@@ -40,7 +41,7 @@ init = ->
         if navigator.geolocation
           geoMarker = new GeolocationMarker
           google.maps.event.addListenerOnce geoMarker, 'position_changed', ->
-            map.setZoom 11
+            map.setZoom geoZoom
             map.setCenter @getPosition()
             return
           google.maps.event.addListener geoMarker, 'geolocation_error', (e) ->
