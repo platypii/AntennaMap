@@ -5,13 +5,15 @@ Antenna Map
  */
 
 (function() {
-  var addMarker, algorithmiaClient, boundsChanged, closeAllMarkers, geoMarker, icons, init, lastChange, lastQuery, map, markers, meters2feet, query, querying, updateMap;
+  var addMarker, algorithmiaClient, boundsChanged, closeMarkers, geoMarker, icons, init, lastChange, lastQuery, map, markers, meters2feet, openMarker, query, querying, updateMap;
 
   map = null;
 
   geoMarker = null;
 
   markers = {};
+
+  openMarker = null;
 
   querying = false;
 
@@ -49,7 +51,7 @@ Antenna Map
         geoMarker.setMap(map);
       }
       map.addListener('bounds_changed', boundsChanged);
-      map.addListener('click', closeAllMarkers);
+      map.addListener('click', closeMarkers);
     });
   };
 
@@ -123,25 +125,21 @@ Antenna Map
     });
     marker.info.isOpen = false;
     marker.addListener('click', function() {
-      var shouldOpen;
-      shouldOpen = !marker.info.isOpen;
-      closeAllMarkers();
-      if (shouldOpen) {
+      if (!marker.info.isOpen) {
+        closeMarkers();
         marker.info.open(map, marker);
         marker.info.isOpen = true;
+        openMarker = marker;
       }
     });
     markers[antenna.id] = marker;
   };
 
-  closeAllMarkers = function() {
-    var id, marker;
-    for (id in markers) {
-      marker = markers[id];
-      if (marker.info.isOpen) {
-        marker.info.close();
-        marker.info.isOpen = false;
-      }
+  closeMarkers = function() {
+    if (openMarker) {
+      openMarker.info.close();
+      openMarker.info.isOpen = false;
+      openMarker = null;
     }
   };
 

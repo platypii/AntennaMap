@@ -6,6 +6,7 @@ Antenna Map
 map = null
 geoMarker = null
 markers = {}
+openMarker = null
 querying = false
 lastChange = null
 lastQuery = null
@@ -51,7 +52,7 @@ init = ->
 
         # Add listeners
         map.addListener 'bounds_changed', boundsChanged
-        map.addListener 'click', closeAllMarkers
+        map.addListener 'click', closeMarkers
         return
     return
 
@@ -122,22 +123,22 @@ addMarker = (antenna) ->
             """
     marker.info.isOpen = false
     marker.addListener 'click', ->
-        shouldOpen = not marker.info.isOpen
-        # Close all other markers
-        closeAllMarkers()
-        # Open info window
-        if shouldOpen
+        if not marker.info.isOpen
+            # Close other markers
+            closeMarkers()
+            # Open info window
             marker.info.open(map, marker)
             marker.info.isOpen = true
+            openMarker = marker
         return
     markers[antenna.id] = marker
     return
 
-closeAllMarkers = ->
-    for id, marker of markers
-        if marker.info.isOpen
-            marker.info.close()
-            marker.info.isOpen = false
+closeMarkers = ->
+    if openMarker
+        openMarker.info.close()
+        openMarker.info.isOpen = false
+        openMarker = null
     return
 
 meters2feet = (m) -> Math.floor(3.28084 * m) + "ft"
