@@ -44,7 +44,7 @@ Antenna Map
           map.setCenter(this.getPosition());
         });
         google.maps.event.addListener(geoMarker, 'geolocation_error', function(e) {
-          alert('There was an error obtaining your position.\n\nMessage: ' + e.message);
+          console.error('There was an error obtaining your position.\n\nMessage: ' + e.message);
         });
         geoMarker.setMap(map);
       }

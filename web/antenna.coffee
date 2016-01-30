@@ -39,15 +39,15 @@ init = ->
         map = new google.maps.Map(document.getElementById('map'), mapOptions)
 
         if navigator.geolocation
-          geoMarker = new GeolocationMarker
-          google.maps.event.addListenerOnce geoMarker, 'position_changed', ->
-            map.setZoom geoZoom
-            map.setCenter @getPosition()
-            return
-          google.maps.event.addListener geoMarker, 'geolocation_error', (e) ->
-            alert 'There was an error obtaining your position.\n\nMessage: ' + e.message
-            return
-          geoMarker.setMap map
+            geoMarker = new GeolocationMarker
+            google.maps.event.addListenerOnce geoMarker, 'position_changed', ->
+                map.setZoom geoZoom
+                map.setCenter @getPosition()
+                return
+            google.maps.event.addListener geoMarker, 'geolocation_error', (e) ->
+                console.error 'There was an error obtaining your position.\n\nMessage: ' + e.message
+                return
+            geoMarker.setMap map
 
         # Add listeners
         map.addListener 'bounds_changed', boundsChanged
