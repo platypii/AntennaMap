@@ -4,6 +4,7 @@ Antenna Map
 
 
 map = null
+geoMarker = null
 markers = {}
 querying = false
 lastChange = null
@@ -29,12 +30,24 @@ init = ->
     center_lat = 39
     center_lon = -100
     zoom = 5
+    geoZoom = 11
     google.maps.event.addDomListener window, 'load', ->
         mapOptions =
             zoom: zoom
             center: new google.maps.LatLng(center_lat, center_lon)
             mapTypeId: google.maps.MapTypeId.HYBRID
         map = new google.maps.Map(document.getElementById('map'), mapOptions)
+
+        if navigator.geolocation
+          geoMarker = new GeolocationMarker
+          google.maps.event.addListenerOnce geoMarker, 'position_changed', ->
+            map.setZoom geoZoom
+            map.setCenter @getPosition()
+            return
+          google.maps.event.addListener geoMarker, 'geolocation_error', (e) ->
+            alert 'There was an error obtaining your position.\n\nMessage: ' + e.message
+            return
+          geoMarker.setMap map
 
         # Add listeners
         map.addListener 'bounds_changed', boundsChanged

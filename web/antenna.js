@@ -5,9 +5,11 @@ Antenna Map
  */
 
 (function() {
-  var addMarker, algorithmiaClient, boundsChanged, closeAllMarkers, icons, init, lastChange, lastQuery, map, markers, meters2feet, query, querying, updateMap;
+  var addMarker, algorithmiaClient, boundsChanged, closeAllMarkers, geoMarker, icons, init, lastChange, lastQuery, map, markers, meters2feet, query, querying, updateMap;
 
   map = null;
+
+  geoMarker = null;
 
   markers = {};
 
@@ -22,10 +24,11 @@ Antenna Map
   icons = ["icons/A-16.png", "icons/A-20.png", "icons/A-24.png", "icons/A-28.png", "icons/A-32.png", "icons/A-36.png", "icons/A-40.png"];
 
   init = function() {
-    var center_lat, center_lon, zoom;
+    var center_lat, center_lon, geoZoom, zoom;
     center_lat = 39;
     center_lon = -100;
     zoom = 5;
+    geoZoom = 11;
     google.maps.event.addDomListener(window, 'load', function() {
       var mapOptions;
       mapOptions = {
@@ -34,6 +37,17 @@ Antenna Map
         mapTypeId: google.maps.MapTypeId.HYBRID
       };
       map = new google.maps.Map(document.getElementById('map'), mapOptions);
+      if (navigator.geolocation) {
+        geoMarker = new GeolocationMarker;
+        google.maps.event.addListenerOnce(geoMarker, 'position_changed', function() {
+          map.setZoom(geoZoom);
+          map.setCenter(this.getPosition());
+        });
+        google.maps.event.addListener(geoMarker, 'geolocation_error', function(e) {
+          alert('There was an error obtaining your position.\n\nMessage: ' + e.message);
+        });
+        geoMarker.setMap(map);
+      }
       map.addListener('bounds_changed', boundsChanged);
       map.addListener('click', closeAllMarkers);
     });
