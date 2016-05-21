@@ -11,6 +11,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
@@ -121,7 +122,7 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnCamera
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if(requestCode == MY_PERMISSIONS_REQUEST_LOCATION) {
             if(grantResults.length == 1 &&
                     permissions[0] == Manifest.permission.ACCESS_FINE_LOCATION &&
