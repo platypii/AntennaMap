@@ -18,7 +18,7 @@ class ASRDatabase {
     private static boolean started = false;
     private static boolean loading = false;
 
-    public static synchronized void start(Context appContext) {
+    static synchronized void start(Context appContext) {
         // Start database
         if (!started) {
             helper = new ASRDatabaseHelper(appContext);
@@ -34,7 +34,7 @@ class ASRDatabase {
     }
 
     /** Return true iff there is data ready to query */
-    public static boolean isReady() {
+    static boolean isReady() {
         if(!started) {
             Log.i("ASRDatabase", "Not ready: database is not started");
             return false;
@@ -58,7 +58,7 @@ class ASRDatabase {
         return rows;
     }
 
-    public static void loadDataAsync(final Iterator<ASRRecord> asrIterator) {
+    static void loadDataAsync(final Iterator<ASRRecord> asrIterator) {
         if (started && !loading) {
             loading = true;
             new LoadDataTask(asrIterator).execute();
@@ -141,7 +141,7 @@ class ASRDatabase {
     /**
      * Search for the N tallest towers in view
      */
-    public static List<ASRRecord> query(double minLatitude, double maxLatitude, double minLongitude, double maxLongitude, int limit) {
+    static List<ASRRecord> query(double minLatitude, double maxLatitude, double minLongitude, double maxLongitude, int limit) {
         if(started && !loading) {
             final String params[] = {
                     Double.toString(minLatitude),

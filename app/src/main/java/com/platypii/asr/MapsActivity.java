@@ -125,7 +125,7 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnCamera
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if(requestCode == MY_PERMISSIONS_REQUEST_LOCATION) {
             if(grantResults.length == 1 &&
-                    permissions[0] == Manifest.permission.ACCESS_FINE_LOCATION &&
+                    permissions[0] != null && permissions[0].equals(Manifest.permission.ACCESS_FINE_LOCATION) &&
                     grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 if(map != null) {
                     try {
@@ -236,7 +236,7 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnCamera
 
     private class UpdateMapTask extends AsyncTask<Void, Void, List<ASRRecord>> {
         private final LatLngBounds bounds;
-        public UpdateMapTask(LatLngBounds bounds) {
+        UpdateMapTask(LatLngBounds bounds) {
             this.bounds = bounds;
         }
         @Override

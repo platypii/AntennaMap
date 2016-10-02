@@ -3,6 +3,7 @@ package com.platypii.asr;
 import android.content.Context;
 import android.util.Log;
 
+import com.google.firebase.crash.FirebaseCrash;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -17,9 +18,9 @@ import java.util.Iterator;
 import java.util.zip.GZIPInputStream;
 
 class ASRFile {
-	public static File cacheFile;
+    static File cacheFile;
 
-    public static void start(Context appContext) {
+    static void start(Context appContext) {
         // Get reference to cache file
         if(cacheFile != null) {
             Log.e("ASRFile", "Already loaded");
@@ -38,13 +39,14 @@ class ASRFile {
                     Log.i("ASRFile", "Copied default cache file from resources");
                 } catch (IOException e) {
                     Log.e("ASRFile", "Error copying default cache file from resources", e);
+                    FirebaseCrash.report(e);
                 }
             }
         }
     }
 
     /** Scan the cache file for length and MD5 */
-    public static String md5() {
+    static String md5() {
         if (cacheFile == null) {
             Log.e("ASRFile", "Not initialized");
             return null;
@@ -69,11 +71,11 @@ class ASRFile {
         }
     }
 
-    public static long size() {
+    static long size() {
         return cacheFile.length();
     }
 
-    public static int rowCount() {
+    static int rowCount() {
         if (cacheFile == null) {
             Log.e("ASRFile", "Not initialized");
             return -1;
@@ -100,7 +102,7 @@ class ASRFile {
         }
     }
 
-    public static Iterator<ASRRecord> iterator() {
+    static Iterator<ASRRecord> iterator() {
         if(cacheFile == null) {
             Log.e("ASRFile", "Not initialized");
             return null;
@@ -117,6 +119,7 @@ class ASRFile {
                         nextLine = reader.readLine();
                     } catch (IOException e) {
                         Log.e("ASRFile", "Error reading file", e);
+                        FirebaseCrash.report(e);
                     }
                 }
 
@@ -160,6 +163,7 @@ class ASRFile {
             return new ASRRecord(id, latitude, longitude, height);
         } catch(Exception e) {
             Log.e("ASRFile", "Failed to parse line " + line, e);
+            FirebaseCrash.report(e);
             return null;
         }
     }

@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "274496313066",
+    "firebase_url": "https://antennamap-2f529.firebaseio.com",
+    "project_id": "antennamap-2f529",
+    "storage_bucket": "antennamap-2f529.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:274496313066:android:0d68edb8851dffa3",
+        "android_client_info": {
+          "package_name": "com.platypii.asr"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "274496313066-ndavtsbv6f265ca6c6ctmljpbgk2r1kv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCibqfPuyogZuXgOe9ICkgz5Likn3DQco4"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

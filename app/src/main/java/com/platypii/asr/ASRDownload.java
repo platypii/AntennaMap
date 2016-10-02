@@ -3,6 +3,7 @@ package com.platypii.asr;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.google.firebase.crash.FirebaseCrash;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,7 +16,7 @@ class ASRDownload {
     // private static final String fileUrl = "https://platypii.s3.amazonaws.com/asr/v1/asr-dev.csv.gz";
 
     /** Check for new ASR file, and if necessary, download and reload new data */
-    public static void updateAsync() {
+    static void updateAsync() {
         if(ASRFile.cacheFile != null) {
             if(ASRFile.cacheFile.exists()) {
                 Log.w("ASRDownload", "Checking for latest ASR file");
@@ -74,6 +75,7 @@ class ASRDownload {
                 }
             } catch(IOException e) {
                 Log.e("ASRFile", "Download error: " + e, e);
+                FirebaseCrash.report(e);
                 return null;
             }
         }
@@ -130,6 +132,7 @@ class ASRDownload {
                 return true;
             } catch(IOException e) {
                 Log.e("ASRDownload", "Download failed: ", e);
+                FirebaseCrash.report(e);
                 return false;
             }
         }
