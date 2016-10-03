@@ -16,11 +16,12 @@ class Assets {
     // sizedIcons[1] = 1..200m
     private static final BitmapDescriptor sizedIcons[] = new BitmapDescriptor[7];
 
-    public static BitmapDescriptor getSizedIcon(Context context, double height) {
+    static BitmapDescriptor getSizedIcon(Context context, double height) {
+        final float density = context.getResources().getDisplayMetrics().density;
         final int index = (int)(height / 100);
         if(sizedIcons[index] == null) {
             // Generate icon
-            final int size = 40 + index * 16;
+            final int size = (int) ((14 + index * 5) * density);
             final Drawable drawable = ContextCompat.getDrawable(context, R.mipmap.ic_launcher);
             if(drawable != null) {
                 final Bitmap bitmap = ((BitmapDrawable) (drawable)).getBitmap();

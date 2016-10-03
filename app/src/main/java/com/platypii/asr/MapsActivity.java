@@ -265,7 +265,7 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnCamera
                 for (ASRRecord tower : towers) {
                     if (!markers.containsKey(tower)) {
                         // Create new marker
-                        final float alpha = (float) (tower.height) / 1260f + 0.5f;
+                        final float alpha = ((float) (tower.height) / 630f) * 0.4f + 0.6f;
                         final BitmapDescriptor icon = Assets.getSizedIcon(MapsActivity.this, tower.height);
                         final Marker marker = map.addMarker(
                                 new MarkerOptions()

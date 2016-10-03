@@ -9,12 +9,12 @@ import java.util.List;
 
 class ASR {
 
-	private static final int LIMIT = 20;
+    private static final int LIMIT = 22;
 
     // Flag to indicate that cache file was loaded from resources, and needs to be reloaded
-    public static boolean reloadRequired = false;
+    static boolean reloadRequired = false;
 
-    public static void init(Context appContext) {
+    static void init(Context appContext) {
         // Start the database
         ASRDatabase.start(appContext);
         if(!ASRDatabase.isReady()) {
@@ -28,18 +28,18 @@ class ASR {
     }
 
     // Callback for when file loading complete
-    public static void fileLoaded() {
+    static void fileLoaded() {
         // Load file into database
         ASRDatabase.loadDataAsync(ASRFile.iterator());
         reloadRequired = false;
     }
 
     // Callback for when database loading complete
-    public static void ready() {
+    static void ready() {
         MapsActivity.updateMap();
     }
 
-    public static List<ASRRecord> query(LatLngBounds bounds) {
+    static List<ASRRecord> query(LatLngBounds bounds) {
         Log.w("ASR", "Querying for " + bounds);
         final long startTime = System.nanoTime();
         final List<ASRRecord> results = ASRDatabase.query(bounds.southwest.latitude, bounds.northeast.latitude, bounds.southwest.longitude, bounds.northeast.longitude, LIMIT);
