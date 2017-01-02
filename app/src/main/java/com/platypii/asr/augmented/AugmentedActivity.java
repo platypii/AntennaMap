@@ -14,14 +14,16 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
-import android.widget.FrameLayout;
+import com.google.android.cameraview.CameraView;
 import com.platypii.asr.R;
 
 public class AugmentedActivity extends Activity implements SensorEventListener, LocationListener {
     private static final String TAG = "AR";
 
     private static final int REQUEST_PERMISSION_CAMERA = 1;
+    private static final int REQUEST_PERMISSION_LOCATION = 2;
 
+    private CameraView cameraView;
     private ExitView exitView;
 
     @Override
@@ -30,6 +32,7 @@ public class AugmentedActivity extends Activity implements SensorEventListener, 
         setContentView(R.layout.activity_augmented);
 
         // Find views
+        cameraView = (CameraView) findViewById(R.id.camera);
         exitView = (ExitView) findViewById(R.id.exitView);
 
         // Sensors
@@ -42,8 +45,8 @@ public class AugmentedActivity extends Activity implements SensorEventListener, 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
         } else {
-            Log.e(TAG, "Location permission not granted");
-            // TODO: call requestPermissions()
+            // Request permission
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_PERMISSION_LOCATION);
             // TODO: implement onRequestPermissionsResult()
         }
 
@@ -112,4 +115,17 @@ public class AugmentedActivity extends Activity implements SensorEventListener, 
     public void onProviderEnabled(String s) {}
     @Override
     public void onProviderDisabled(String s) {}
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        cameraView.start();
+
+        // TODO: Get FOV
+    }
+    @Override
+    protected void onPause() {
+        cameraView.stop();
+        super.onPause();
+    }
 }
