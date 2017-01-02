@@ -41,8 +41,8 @@ public class AugmentedActivity extends Activity implements SensorEventListener, 
         sensorManager.registerListener(this, rotationSensor, SensorManager.SENSOR_DELAY_FASTEST);
 
         // Location
-        final LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            final LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
         } else {
             // Request permission
@@ -79,7 +79,7 @@ public class AugmentedActivity extends Activity implements SensorEventListener, 
                 SensorManager.getRotationMatrixFromVector(rotation, event.values);
                 SensorManager.remapCoordinateSystem(rotation, SensorManager.AXIS_X, SensorManager.AXIS_Z, cameraRotation);
                 SensorManager.getOrientation(cameraRotation, orientation);
-                exitView.update(orientation);
+                exitView.updateOrientation(orientation);
                 break;
             default:
                 Log.e("MySensorManager", "Received unexpected sensor event");
@@ -87,7 +87,30 @@ public class AugmentedActivity extends Activity implements SensorEventListener, 
     }
 
     @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+    public void onLocationChanged(Location location) {
+        // Update location
+        exitView.updateLocation(location);
+    }
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {}
+    @Override
+    public void onStatusChanged(String s, int i, Bundle bundle) {}
+    @Override
+    public void onProviderEnabled(String s) {}
+    @Override
+    public void onProviderDisabled(String s) {}
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        cameraView.start();
+
+        // TODO: Get camera FOV
+    }
+    @Override
+    protected void onPause() {
+        cameraView.stop();
+        super.onPause();
     }
 
     @Override
@@ -105,27 +128,4 @@ public class AugmentedActivity extends Activity implements SensorEventListener, 
         }
     }
 
-    @Override
-    public void onLocationChanged(Location location) {
-
-    }
-    @Override
-    public void onStatusChanged(String s, int i, Bundle bundle) {}
-    @Override
-    public void onProviderEnabled(String s) {}
-    @Override
-    public void onProviderDisabled(String s) {}
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        cameraView.start();
-
-        // TODO: Get FOV
-    }
-    @Override
-    protected void onPause() {
-        cameraView.stop();
-        super.onPause();
-    }
 }
