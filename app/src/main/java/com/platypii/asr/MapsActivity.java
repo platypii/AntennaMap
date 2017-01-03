@@ -15,6 +15,7 @@ import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
+import android.view.View;
 import android.widget.ProgressBar;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -25,6 +26,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.platypii.asr.augmented.AugmentedActivity;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -251,6 +253,11 @@ public class MapsActivity extends Activity implements GoogleMap.OnCameraMoveList
         if(instance != null) {
             instance.mUpdateMap();
         }
+    }
+
+    public void clickAugmented(View view) {
+        Log.i(TAG, "User clicked augmented reality view");
+        startActivity(new Intent(this, AugmentedActivity.class));
     }
 
     private class UpdateMapTask extends AsyncTask<Void, Void, List<Place>> {
