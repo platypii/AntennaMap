@@ -2,12 +2,12 @@ package com.platypii.asr;
 
 import com.google.android.gms.maps.model.LatLng;
 
-class Place {
+public class Place {
 
-    final long id;
-	final double latitude;
-	final double longitude;
-	final double altitude;
+    public final long id;
+    public final double latitude;
+    public final double longitude;
+    public final double altitude;
 
 	Place(long id, double latitude, double longitude, double altitude) {
         this.id = id;

@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-class PlaceDatabase {
+public class PlaceDatabase {
     private static final String TAG = "PlaceDatabase";
 
     private static PlaceDatabaseHelper helper;
@@ -141,7 +141,7 @@ class PlaceDatabase {
     /**
      * Search for the N tallest towers in view
      */
-    static List<Place> query(double minLatitude, double maxLatitude, double minLongitude, double maxLongitude, int limit) {
+    public static List<Place> query(double minLatitude, double maxLatitude, double minLongitude, double maxLongitude, int limit) {
         if(started && !loading) {
             final String params[] = {
                     Double.toString(minLatitude),
