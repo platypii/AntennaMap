@@ -2,25 +2,25 @@ package com.platypii.asr;
 
 import com.google.android.gms.maps.model.LatLng;
 
-public class ASRRecord {
+class ASRRecord {
 
-    public final long id;
-	public final double latitude;
-	public final double longitude;
-	public final double height;
+    final long id;
+	final double latitude;
+	final double longitude;
+	final double height;
 
-	public ASRRecord(long id, double latitude, double longitude, double height) {
+	ASRRecord(long id, double latitude, double longitude, double height) {
         this.id = id;
 		this.latitude = latitude;
 		this.longitude = longitude;
 		this.height = height;
 	}
 
-    public LatLng latLng() {
+    LatLng latLng() {
         return new LatLng(latitude, longitude);
     }
 
-    public String url() {
+    String url() {
         return "http://wireless2.fcc.gov/UlsApp/AsrSearch/asrRegistration.jsp?regKey=" + id;
     }
 
