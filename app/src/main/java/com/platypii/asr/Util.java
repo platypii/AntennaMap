@@ -7,7 +7,7 @@ import java.io.InputStream;
 
 class Util {
 
-    public static void copy(InputStream inputStream, File outputFile) throws IOException {
+    static void copy(InputStream inputStream, File outputFile) throws IOException {
         // create a buffer...
         final byte[] buffer = new byte[1024];
         int bufferLength; // used to store temporary size of the buffer

@@ -52,7 +52,7 @@ awk -F'|' '{
 }' asr-full.csv | sort -t',' -k4 -r -g >> asr-tmp.csv
 
 # Remove dups and trim
-awk -F',' '{ if(a[$1]++ == 0 && $4 >= 54.8) print }' asr-tmp.csv > $OUTPUT_FILE
+awk -F',' '{ if(a[$1]++ == 0 && $4 >= 48.768) print }' asr-tmp.csv > $OUTPUT_FILE
 
 # GZip
 echo "Zipping data"

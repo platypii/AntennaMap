@@ -2,12 +2,11 @@ package com.platypii.asr;
 
 import android.content.Context;
 import android.util.Log;
-
 import com.google.android.gms.maps.model.LatLngBounds;
-
 import java.util.List;
 
 class ASR {
+    private static final String TAG = "ASR";
 
     private static final int LIMIT = 22;
 
@@ -40,14 +39,14 @@ class ASR {
     }
 
     static List<ASRRecord> query(LatLngBounds bounds) {
-        Log.w("ASR", "Querying for " + bounds);
+        Log.w(TAG, "Querying for " + bounds);
         final long startTime = System.nanoTime();
         final List<ASRRecord> results = ASRDatabase.query(bounds.southwest.latitude, bounds.northeast.latitude, bounds.southwest.longitude, bounds.northeast.longitude, LIMIT);
         final double queryTime = (System.nanoTime() - startTime) * 10E-9;
         if(results != null) {
-            Log.w("ASR", String.format("Query returned %d results (%.3fs)", results.size(), queryTime));
+            Log.w(TAG, String.format("Query returned %d results (%.3fs)", results.size(), queryTime));
         } else {
-            Log.e("ASR", "Query returned null!");
+            Log.e(TAG, "Query returned null!");
         }
         return results;
     }

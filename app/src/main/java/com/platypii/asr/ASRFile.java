@@ -2,7 +2,6 @@ package com.platypii.asr;
 
 import android.content.Context;
 import android.util.Log;
-
 import com.google.firebase.crash.FirebaseCrash;
 import java.io.BufferedReader;
 import java.io.File;
@@ -18,27 +17,29 @@ import java.util.Iterator;
 import java.util.zip.GZIPInputStream;
 
 class ASRFile {
+    private static final String TAG = "ASRFile";
+
     static File cacheFile;
 
     static void start(Context appContext) {
         // Get reference to cache file
         if(cacheFile != null) {
-            Log.e("ASRFile", "Already loaded");
+            Log.e(TAG, "Already loaded");
         } else {
             final File cacheDir = appContext.getExternalCacheDir();
             cacheFile = new File(cacheDir, "asr.csv.gz");
-            Log.i("ASRFile", "Using ASR file " + cacheFile);
+            Log.i(TAG, "Using ASR file " + cacheFile);
             // Check if file exists
             if(!cacheFile.exists()) {
                 // Fresh install, load default file from resources
-                Log.w("ASRFile", "Cache file does not exist, using default");
+                Log.w(TAG, "Cache file does not exist, using default");
                 try {
                     final InputStream defaultCacheFile = appContext.getResources().openRawResource(R.raw.asr_csv_gz);
                     Util.copy(defaultCacheFile, cacheFile);
                     ASR.reloadRequired = true;
-                    Log.i("ASRFile", "Copied default cache file from resources");
+                    Log.i(TAG, "Copied default cache file from resources");
                 } catch (IOException e) {
-                    Log.e("ASRFile", "Error copying default cache file from resources", e);
+                    Log.e(TAG, "Error copying default cache file from resources", e);
                     FirebaseCrash.report(e);
                 }
             }
@@ -48,7 +49,7 @@ class ASRFile {
     /** Scan the cache file for length and MD5 */
     static String md5() {
         if (cacheFile == null) {
-            Log.e("ASRFile", "Not initialized");
+            Log.e(TAG, "Not initialized");
             return null;
         } else {
             try {
@@ -62,10 +63,10 @@ class ASRFile {
                 // Format digest as hex
                 return String.format("%1$032x", new BigInteger(1, md.digest()));
             } catch (NoSuchAlgorithmException e) {
-                Log.e("ASRFile", "Failed to compute MD5", e);
+                Log.e(TAG, "Failed to compute MD5", e);
                 return null;
             } catch(IOException e) {
-                Log.e("ASRFile", "Failed to read ASR file", e);
+                Log.e(TAG, "Failed to read ASR file", e);
                 return null;
             }
         }
@@ -77,7 +78,7 @@ class ASRFile {
 
     static int rowCount() {
         if (cacheFile == null) {
-            Log.e("ASRFile", "Not initialized");
+            Log.e(TAG, "Not initialized");
             return -1;
         } else {
             // Count rows in cache file
@@ -96,7 +97,7 @@ class ASRFile {
                 inputStream.close();
                 return count;
             } catch(IOException e) {
-                Log.e("ASRFile", "Failed to read ASR file", e);
+                Log.e(TAG, "Failed to read ASR file", e);
                 return -1;
             }
         }
@@ -104,7 +105,7 @@ class ASRFile {
 
     static Iterator<ASRRecord> iterator() {
         if(cacheFile == null) {
-            Log.e("ASRFile", "Not initialized");
+            Log.e(TAG, "Not initialized");
             return null;
         } else {
             return new Iterator<ASRRecord>() {
@@ -118,7 +119,7 @@ class ASRFile {
                         reader.readLine();
                         nextLine = reader.readLine();
                     } catch (IOException e) {
-                        Log.e("ASRFile", "Error reading file", e);
+                        Log.e(TAG, "Error reading file", e);
                         FirebaseCrash.report(e);
                     }
                 }
@@ -152,7 +153,7 @@ class ASRFile {
     private static ASRRecord parseLine(String line) {
         final String[] split = line.split(",");
         if(split.length < 4 || split[0].equals("") || split[1].equals("") || split[2].equals("") || split[3].equals("")) {
-            Log.w("ASRFile", "Failed to parse line " + line);
+            Log.w(TAG, "Failed to parse line " + line);
             return null;
         }
         try {
@@ -162,7 +163,7 @@ class ASRFile {
             final double height = Double.parseDouble(split[3]);
             return new ASRRecord(id, latitude, longitude, height);
         } catch(Exception e) {
-            Log.e("ASRFile", "Failed to parse line " + line, e);
+            Log.e(TAG, "Failed to parse line " + line, e);
             FirebaseCrash.report(e);
             return null;
         }

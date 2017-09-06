@@ -16,7 +16,6 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.widget.ProgressBar;
-
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
@@ -26,7 +25,6 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -52,7 +50,7 @@ public class MapsActivity extends Activity implements GoogleMap.OnCameraMoveList
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         // Find view elements
-        progressSpinner = (ProgressBar) this.findViewById(R.id.progressSpinner);
+        progressSpinner = this.findViewById(R.id.progressSpinner);
         progressSpinner.setVisibility(ProgressBar.GONE);
 
         // Initialize map

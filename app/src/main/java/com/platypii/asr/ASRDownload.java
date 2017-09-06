@@ -2,16 +2,16 @@ package com.platypii.asr;
 
 import android.os.AsyncTask;
 import android.util.Log;
-
 import com.google.firebase.crash.FirebaseCrash;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-
 import javax.net.ssl.HttpsURLConnection;
 
 class ASRDownload {
+    private static final String TAG = "ASRDownload";
+
     private static final String fileUrl = "https://platypii.s3.amazonaws.com/asr/v1/asr.csv.gz";
     // private static final String fileUrl = "https://platypii.s3.amazonaws.com/asr/v1/asr-dev.csv.gz";
 
@@ -19,18 +19,18 @@ class ASRDownload {
     static void updateAsync() {
         if(ASRFile.cacheFile != null) {
             if(ASRFile.cacheFile.exists()) {
-                Log.w("ASRDownload", "Checking for latest ASR file");
+                Log.w(TAG, "Checking for latest ASR file");
                 // Check for newer version in S3
                 new CheckETagTask().execute();
             } else {
-                Log.e("ASRDownload", "Cache file not found");
+                Log.e(TAG, "Cache file not found");
                 // Should already exist, or copied from resources on first run, oh well let's try to download:
                 new DownloadTask().execute();
             }
         } else {
-            Log.e("ASRDownload", "Download failed: cache file not initialized");
+            Log.e(TAG, "Download failed: cache file not initialized");
         }
-        Log.i("ASRDownload", "Returning from updateAsync()");
+        Log.i(TAG, "Returning from updateAsync()");
     }
 
     private static class CheckETagTask extends AsyncTask<Void, Integer, Boolean> {
@@ -39,7 +39,7 @@ class ASRDownload {
             try {
                 final URL url = new URL(fileUrl);
 
-                Log.w("ASRDownload", "Checking eTag for URL: " + url);
+                Log.w(TAG, "Checking eTag for URL: " + url);
                 final HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
                 connection.setRequestMethod("HEAD");
                 connection.connect();
@@ -51,25 +51,25 @@ class ASRDownload {
                     remoteTag = remoteTag.replace("\"", "");
                 }
 
-                Log.i("ASRDownload", "Remote: size = " + remoteSize + ", eTag = " + remoteTag);
+                Log.i(TAG, "Remote: size = " + remoteSize + ", eTag = " + remoteTag);
 
                 final int localSize = (int) ASRFile.size();
                 final String localTag = ASRFile.md5();
 
-                Log.i("ASRDownload", "Local:  size = " + localSize + ", eTag = " + localTag);
+                Log.i(TAG, "Local:  size = " + localSize + ", eTag = " + localTag);
 
                 if(remoteTag == null) {
-                    Log.e("ASRDownload", "Missing eTag");
+                    Log.e(TAG, "Missing eTag");
                     return false;
                 } else if(localSize != remoteSize) {
-                    Log.w("ASRDownload", "Cache length and remote length differ");
+                    Log.w(TAG, "Cache length and remote length differ");
                     return false;
                 } else {
                     if(!remoteTag.equals(localTag)) {
-                        Log.w("ASRDownload", "MD5 does not match " + remoteTag + " != " + localTag);
+                        Log.w(TAG, "MD5 does not match " + remoteTag + " != " + localTag);
                         return false;
                     } else {
-                        Log.w("ASRDownload", "Local file matches remote file");
+                        Log.w(TAG, "Local file matches remote file");
                         return true;
                     }
                 }
@@ -83,7 +83,7 @@ class ASRDownload {
         protected void onPostExecute(Boolean eTagMatches) {
             if(eTagMatches != null && !eTagMatches) {
                 // Newer version available for download
-                Log.w("ASRDownload", "New ASR file found");
+                Log.w(TAG, "New ASR file found");
                 new DownloadTask().execute();
             } else if(ASR.reloadRequired) {
                 // Latest version already downloaded, but reload required
@@ -104,7 +104,7 @@ class ASRDownload {
             try {
                 final URL url = new URL(fileUrl);
 
-                Log.w("ASRDownload", "Downloading URL: " + url);
+                Log.w(TAG, "Downloading URL: " + url);
                 final HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
                 final InputStream inputStream = urlConnection.getInputStream();
 
@@ -124,14 +124,14 @@ class ASRDownload {
                     fileOutput.write(buffer, 0, bufferLength);
                     // add up the size so we know how much is downloaded
                     downloadedSize += bufferLength;
-                    // Log.d("ASRDownload", "Download progress " + downloadedSize + " / " + totalSize);
+                    // Log.d(TAG, "Download progress " + downloadedSize + " / " + totalSize);
                     publishProgress(downloadedSize);
                 }
                 fileOutput.close();
-                Log.w("ASRDownload", "Downloaded asr.csv");
+                Log.w(TAG, "Downloaded asr.csv");
                 return true;
             } catch(IOException e) {
-                Log.e("ASRDownload", "Download failed: ", e);
+                Log.e(TAG, "Download failed: ", e);
                 FirebaseCrash.report(e);
                 return false;
             }
