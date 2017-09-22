@@ -6,14 +6,14 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 import android.os.AsyncTask;
 import android.util.Log;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-class ASRDatabase {
+class PlaceDatabase {
+    private static final String TAG = "PlaceDatabase";
 
-    private static ASRDatabaseHelper helper;
+    private static PlaceDatabaseHelper helper;
     private static SQLiteDatabase database;
     private static boolean started = false;
     private static boolean loading = false;
@@ -21,12 +21,12 @@ class ASRDatabase {
     static synchronized void start(Context appContext) {
         // Start database
         if (!started) {
-            helper = new ASRDatabaseHelper(appContext);
+            helper = new PlaceDatabaseHelper(appContext);
             database = helper.getReadableDatabase();
-            Log.w("ASRDatabase", "Database started");
+            Log.w(TAG, "Database started");
             started = true;
         } else {
-            Log.e("ASRDatabase", "Already started");
+            Log.e(TAG, "Already started");
             if (database == null) {
                 database = helper.getReadableDatabase();
             }
@@ -36,43 +36,43 @@ class ASRDatabase {
     /** Return true iff there is data ready to query */
     static boolean isReady() {
         if(!started) {
-            Log.i("ASRDatabase", "Not ready: database is not started");
+            Log.i(TAG, "Not ready: database is not started");
             return false;
         } else if(loading) {
-            Log.i("ASRDatabase", "Not ready: database is loading");
+            Log.i(TAG, "Not ready: database is loading");
             return false;
         } else {
             // Return true iff there is data ready to query
             final int rows = getRows();
-            Log.w("ASRDatabase", "Database ready with " + rows + " rows");
+            Log.w(TAG, "Database ready with " + rows + " rows");
             return rows > 0;
         }
     }
 
     private static int getRows() {
         // Assumes started and not loading
-        final Cursor cursor = database.rawQuery("SELECT COUNT(id) FROM asr", null);
+        final Cursor cursor = database.rawQuery("SELECT COUNT(id) FROM place", null);
         cursor.moveToFirst();
         final int rows = cursor.getInt(0);
         cursor.close();
         return rows;
     }
 
-    static void loadDataAsync(final Iterator<ASRRecord> asrIterator) {
+    static void loadDataAsync(final Iterator<Place> places) {
         if (started && !loading) {
             loading = true;
-            new LoadDataTask(asrIterator).execute();
+            new LoadDataTask(places).execute();
         } else {
-            Log.e("ASRDatabase", "Unexpected load data callback");
+            Log.e(TAG, "Unexpected load data callback");
         }
     }
 
     private static class LoadDataTask extends AsyncTask<Void, Integer, Void> {
-        private final Iterator<ASRRecord> asrIterator;
+        private final Iterator<Place> places;
         private int totalSize = -1;
 
-        LoadDataTask(Iterator<ASRRecord> asrIterator) {
-            this.asrIterator = asrIterator;
+        LoadDataTask(Iterator<Place> places) {
+            this.places = places;
         }
 
         @Override
@@ -82,10 +82,10 @@ class ASRDatabase {
 
         @Override
         protected Void doInBackground(Void... params) {
-            Log.w("ASRDatabase", "Loading database from cache file");
+            Log.w(TAG, "Loading database from cache file");
             // Get row count
-            totalSize = ASRFile.rowCount();
-            Log.w("ASRDatabase", "Rows: " + totalSize);
+            totalSize = PlaceFile.rowCount();
+            Log.w(TAG, "Rows: " + totalSize);
             int count = 0;
             publishProgress(0);
 
@@ -94,22 +94,22 @@ class ASRDatabase {
             database = null;
             final SQLiteDatabase writableDatabase = helper.getWritableDatabase();
             writableDatabase.beginTransaction();
-            writableDatabase.execSQL("DELETE FROM asr");
+            writableDatabase.execSQL("DELETE FROM place");
             // Prepared statement
-            final SQLiteStatement insertStatement = writableDatabase.compileStatement("INSERT OR IGNORE INTO asr VALUES (?,?,?,?)");
-            while (asrIterator.hasNext()) {
-                final ASRRecord record = asrIterator.next();
+            final SQLiteStatement insertStatement = writableDatabase.compileStatement("INSERT OR IGNORE INTO place VALUES (?,?,?,?)");
+            while (places.hasNext()) {
+                final Place record = places.next();
                 if (record != null) {
                     // Add to database
                     insertStatement.bindLong(1, record.id);
                     insertStatement.bindDouble(2, record.latitude);
                     insertStatement.bindDouble(3, record.longitude);
-                    insertStatement.bindDouble(4, record.height);
+                    insertStatement.bindDouble(4, record.altitude);
                     insertStatement.executeInsert();
                     // Update progress dialog
                     if (count % 100 == 0) {
                         if (count % 1000 == 0) {
-                            Log.i("ASRDatabase", "Populating database row " + count);
+                            Log.i(TAG, "Populating database row " + count);
                         }
                         publishProgress(count);
                     }
@@ -121,7 +121,7 @@ class ASRDatabase {
             writableDatabase.close();
             database = helper.getReadableDatabase();
             loading = false;
-            Log.w("ASRDatabase", "Database loaded from file");
+            Log.w(TAG, "Database loaded from file");
             return null;
         }
 
@@ -141,7 +141,7 @@ class ASRDatabase {
     /**
      * Search for the N tallest towers in view
      */
-    static List<ASRRecord> query(double minLatitude, double maxLatitude, double minLongitude, double maxLongitude, int limit) {
+    static List<Place> query(double minLatitude, double maxLatitude, double minLongitude, double maxLongitude, int limit) {
         if(started && !loading) {
             final String params[] = {
                     Double.toString(minLatitude),
@@ -154,26 +154,26 @@ class ASRDatabase {
                     " AND ? < longitude AND longitude < ?" :
                     " AND ? < longitude OR longitude < ?";
             final Cursor cursor = database.rawQuery(
-                    "SELECT * FROM asr" +
+                    "SELECT id, latitude, longitude, altitude FROM place" +
                             " WHERE ? < latitude AND latitude < ?" +
                             longitudeQuery +
-                            " ORDER BY height DESC LIMIT ?", params);
-            final ArrayList<ASRRecord> records = new ArrayList<>();
+                            " ORDER BY altitude DESC LIMIT ?", params);
+            final ArrayList<Place> records = new ArrayList<>();
             while (cursor.moveToNext()) {
                 final long id = cursor.getLong(0);
                 final double latitude = cursor.getDouble(1);
                 final double longitude = cursor.getDouble(2);
-                final double height = cursor.getDouble(3);
-                final ASRRecord record = new ASRRecord(id, latitude, longitude, height);
+                final double altitude = cursor.getDouble(3);
+                final Place record = new Place(id, latitude, longitude, altitude);
                 records.add(record);
             }
             cursor.close();
             return records;
         } else if(loading) {
-            Log.w("ASRDatabase", "Query attempted while still loading");
+            Log.w(TAG, "Query attempted while still loading");
             return null;
         } else {
-            Log.e("ASRDatabase", "Query attempted on uninitialized database");
+            Log.e(TAG, "Query attempted on uninitialized database");
             return null;
         }
     }

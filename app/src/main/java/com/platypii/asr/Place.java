@@ -2,18 +2,18 @@ package com.platypii.asr;
 
 import com.google.android.gms.maps.model.LatLng;
 
-class ASRRecord {
+class Place {
 
     final long id;
 	final double latitude;
 	final double longitude;
-	final double height;
+	final double altitude;
 
-	ASRRecord(long id, double latitude, double longitude, double height) {
+	Place(long id, double latitude, double longitude, double altitude) {
         this.id = id;
 		this.latitude = latitude;
 		this.longitude = longitude;
-		this.height = height;
+		this.altitude = altitude;
 	}
 
     LatLng latLng() {
@@ -25,7 +25,7 @@ class ASRRecord {
     }
 
     @Override public boolean equals(Object obj) {
-        return obj instanceof ASRRecord && id == ((ASRRecord)obj).id;
+        return obj instanceof Place && id == ((Place)obj).id;
     }
 
     @Override public int hashCode() {

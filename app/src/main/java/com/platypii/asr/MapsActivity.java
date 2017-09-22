@@ -226,7 +226,7 @@ public class MapsActivity extends Activity implements GoogleMap.OnCameraMoveList
         }
     }
 
-    private final HashMap<ASRRecord,Marker> markers = new HashMap<>();
+    private final HashMap<Place,Marker> markers = new HashMap<>();
     private boolean querying = false;
     private void mUpdateMap() {
         if(map == null) {
@@ -253,7 +253,7 @@ public class MapsActivity extends Activity implements GoogleMap.OnCameraMoveList
         }
     }
 
-    private class UpdateMapTask extends AsyncTask<Void, Void, List<ASRRecord>> {
+    private class UpdateMapTask extends AsyncTask<Void, Void, List<Place>> {
         private final LatLngBounds bounds;
         UpdateMapTask(LatLngBounds bounds) {
             this.bounds = bounds;
@@ -263,34 +263,34 @@ public class MapsActivity extends Activity implements GoogleMap.OnCameraMoveList
             progressSpinner.setVisibility(ProgressBar.VISIBLE);
         }
         @Override
-        protected List<ASRRecord> doInBackground(Void... params) {
+        protected List<Place> doInBackground(Void... params) {
             return ASR.query(bounds);
         }
         @Override
-        protected void onPostExecute(List<ASRRecord> towers) {
+        protected void onPostExecute(List<Place> towers) {
             if (towers != null) {
                 // Remove stale markers
-                final Set<ASRRecord> toDelete = new HashSet<>();
-                for (ASRRecord tower : markers.keySet()) {
+                final Set<Place> toDelete = new HashSet<>();
+                for (Place tower : markers.keySet()) {
                     if (!towers.contains(tower)) {
                         markers.get(tower).remove();
                         toDelete.add(tower);
                     }
                 }
-                for (ASRRecord record : toDelete) {
+                for (Place record : toDelete) {
                     markers.remove(record);
                 }
                 // Add new markers
-                for (ASRRecord tower : towers) {
+                for (Place tower : towers) {
                     if (!markers.containsKey(tower)) {
                         // Create new marker
-                        final float alpha = ((float) (tower.height) / 630f) * 0.4f + 0.6f;
-                        final BitmapDescriptor icon = Assets.getSizedIcon(MapsActivity.this, tower.height);
+                        final float alpha = ((float) (tower.altitude) / 630f) * 0.4f + 0.6f;
+                        final BitmapDescriptor icon = Assets.getSizedIcon(MapsActivity.this, tower.altitude);
                         final Marker marker = map.addMarker(
                                 new MarkerOptions()
                                         .position(tower.latLng())
                                         .icon(icon)
-                                        .title(Convert.toFeet(tower.height))
+                                        .title(Convert.toFeet(tower.altitude))
                                         .alpha(alpha)
                         );
                         markers.put(tower, marker);
@@ -308,12 +308,12 @@ public class MapsActivity extends Activity implements GoogleMap.OnCameraMoveList
     public void onInfoWindowClick(Marker marker) {
         Log.w(TAG, "Clicked marker info");
         // Find which marker
-        for(Map.Entry<ASRRecord,Marker> entry : markers.entrySet()) {
+        for(Map.Entry<Place,Marker> entry : markers.entrySet()) {
             if(entry.getValue().equals(marker)) {
-                final ASRRecord record = entry.getKey();
+                final Place place = entry.getKey();
                 // Open url
-                Log.w(TAG, "Opening url for tower " + record.id);
-                final Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(record.url()));
+                Log.w(TAG, "Opening url for tower " + place.id);
+                final Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(place.url()));
                 startActivity(browserIntent);
             }
         }

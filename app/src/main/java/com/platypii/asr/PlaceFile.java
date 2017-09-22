@@ -16,8 +16,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Iterator;
 import java.util.zip.GZIPInputStream;
 
-class ASRFile {
-    private static final String TAG = "ASRFile";
+class PlaceFile {
+    private static final String TAG = "PlaceFile";
 
     static File cacheFile;
 
@@ -27,8 +27,8 @@ class ASRFile {
             Log.e(TAG, "Already loaded");
         } else {
             final File cacheDir = appContext.getExternalCacheDir();
-            cacheFile = new File(cacheDir, "asr.csv.gz");
-            Log.i(TAG, "Using ASR file " + cacheFile);
+            cacheFile = new File(cacheDir, "places.csv.gz");
+            Log.i(TAG, "Using place file " + cacheFile);
             // Check if file exists
             if(!cacheFile.exists()) {
                 // Fresh install, load default file from resources
@@ -66,7 +66,7 @@ class ASRFile {
                 Log.e(TAG, "Failed to compute MD5", e);
                 return null;
             } catch(IOException e) {
-                Log.e(TAG, "Failed to read ASR file", e);
+                Log.e(TAG, "Failed to read place file", e);
                 return null;
             }
         }
@@ -97,18 +97,18 @@ class ASRFile {
                 inputStream.close();
                 return count;
             } catch(IOException e) {
-                Log.e(TAG, "Failed to read ASR file", e);
+                Log.e(TAG, "Failed to read place file", e);
                 return -1;
             }
         }
     }
 
-    static Iterator<ASRRecord> iterator() {
+    static Iterator<Place> iterator() {
         if(cacheFile == null) {
             Log.e(TAG, "Not initialized");
             return null;
         } else {
-            return new Iterator<ASRRecord>() {
+            return new Iterator<Place>() {
                 private BufferedReader reader;
                 private String nextLine;
 
@@ -130,8 +130,8 @@ class ASRFile {
                 }
 
                 @Override
-                public ASRRecord next() {
-                    final ASRRecord record = parseLine(nextLine);
+                public Place next() {
+                    final Place record = parseLine(nextLine);
                     try {
                         nextLine = reader.readLine();
                     } catch (IOException e) {
@@ -148,9 +148,9 @@ class ASRFile {
     }
 
     /**
-     * Parse a CSV line into an ASRRecord
+     * Parse a CSV line into a place
      */
-    private static ASRRecord parseLine(String line) {
+    private static Place parseLine(String line) {
         final String[] split = line.split(",");
         if(split.length < 4 || split[0].equals("") || split[1].equals("") || split[2].equals("") || split[3].equals("")) {
             Log.w(TAG, "Failed to parse line " + line);
@@ -160,8 +160,8 @@ class ASRFile {
             final long id = Long.parseLong(split[0]);
             final double latitude = Double.parseDouble(split[1]) / 3600.0;
             final double longitude = Double.parseDouble(split[2]) / 3600.0;
-            final double height = Double.parseDouble(split[3]);
-            return new ASRRecord(id, latitude, longitude, height);
+            final double altitude = Double.parseDouble(split[3]);
+            return new Place(id, latitude, longitude, altitude);
         } catch(Exception e) {
             Log.e(TAG, "Failed to parse line " + line, e);
             FirebaseCrash.report(e);

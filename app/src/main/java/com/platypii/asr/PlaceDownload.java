@@ -9,17 +9,17 @@ import java.io.InputStream;
 import java.net.URL;
 import javax.net.ssl.HttpsURLConnection;
 
-class ASRDownload {
-    private static final String TAG = "ASRDownload";
+class PlaceDownload {
+    private static final String TAG = "PlaceDownload";
 
     private static final String fileUrl = "https://platypii.s3.amazonaws.com/asr/v1/asr.csv.gz";
     // private static final String fileUrl = "https://platypii.s3.amazonaws.com/asr/v1/asr-dev.csv.gz";
 
-    /** Check for new ASR file, and if necessary, download and reload new data */
+    /** Check for new place file, and if necessary, download and reload new data */
     static void updateAsync() {
-        if(ASRFile.cacheFile != null) {
-            if(ASRFile.cacheFile.exists()) {
-                Log.w(TAG, "Checking for latest ASR file");
+        if(PlaceFile.cacheFile != null) {
+            if(PlaceFile.cacheFile.exists()) {
+                Log.w(TAG, "Checking for latest place file");
                 // Check for newer version in S3
                 new CheckETagTask().execute();
             } else {
@@ -53,8 +53,8 @@ class ASRDownload {
 
                 Log.i(TAG, "Remote: size = " + remoteSize + ", eTag = " + remoteTag);
 
-                final int localSize = (int) ASRFile.size();
-                final String localTag = ASRFile.md5();
+                final int localSize = (int) PlaceFile.size();
+                final String localTag = PlaceFile.md5();
 
                 Log.i(TAG, "Local:  size = " + localSize + ", eTag = " + localTag);
 
@@ -74,7 +74,7 @@ class ASRDownload {
                     }
                 }
             } catch(IOException e) {
-                Log.e("ASRFile", "Download error: " + e, e);
+                Log.e("PlaceFile", "Download error: " + e, e);
                 FirebaseCrash.report(e);
                 return null;
             }
@@ -83,7 +83,7 @@ class ASRDownload {
         protected void onPostExecute(Boolean eTagMatches) {
             if(eTagMatches != null && !eTagMatches) {
                 // Newer version available for download
-                Log.w(TAG, "New ASR file found");
+                Log.w(TAG, "New place file found");
                 new DownloadTask().execute();
             } else if(ASR.reloadRequired) {
                 // Latest version already downloaded, but reload required
@@ -118,7 +118,7 @@ class ASRDownload {
                 int bufferLength; // used to store a temporary size of the buffer
 
                 // now, read through the input buffer and write the contents to the file
-                final FileOutputStream fileOutput = new FileOutputStream(ASRFile.cacheFile);
+                final FileOutputStream fileOutput = new FileOutputStream(PlaceFile.cacheFile);
                 while( (bufferLength = inputStream.read(buffer)) > 0 ) {
                     // add the data in the buffer to the file in the file output stream (the file on the sd card
                     fileOutput.write(buffer, 0, bufferLength);
@@ -128,7 +128,7 @@ class ASRDownload {
                     publishProgress(downloadedSize);
                 }
                 fileOutput.close();
-                Log.w(TAG, "Downloaded asr.csv");
+                Log.w(TAG, "Downloaded place file");
                 return true;
             } catch(IOException e) {
                 Log.e(TAG, "Download failed: ", e);

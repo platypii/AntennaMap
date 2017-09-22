@@ -15,13 +15,13 @@ class ASR {
 
     static void init(Context appContext) {
         // Start the database
-        ASRDatabase.start(appContext);
-        if(!ASRDatabase.isReady()) {
+        PlaceDatabase.start(appContext);
+        if(!PlaceDatabase.isReady()) {
             reloadRequired = true;
         }
-        ASRFile.start(appContext);
-        ASRDownload.updateAsync();
-        if(ASRDatabase.isReady()) {
+        PlaceFile.start(appContext);
+        PlaceDownload.updateAsync();
+        if(PlaceDatabase.isReady()) {
             ASR.ready();
         }
     }
@@ -29,7 +29,7 @@ class ASR {
     // Callback for when file loading complete
     static void fileLoaded() {
         // Load file into database
-        ASRDatabase.loadDataAsync(ASRFile.iterator());
+        PlaceDatabase.loadDataAsync(PlaceFile.iterator());
         reloadRequired = false;
     }
 
@@ -38,10 +38,10 @@ class ASR {
         MapsActivity.updateMap();
     }
 
-    static List<ASRRecord> query(LatLngBounds bounds) {
+    static List<Place> query(LatLngBounds bounds) {
         Log.w(TAG, "Querying for " + bounds);
         final long startTime = System.nanoTime();
-        final List<ASRRecord> results = ASRDatabase.query(bounds.southwest.latitude, bounds.northeast.latitude, bounds.southwest.longitude, bounds.northeast.longitude, LIMIT);
+        final List<Place> results = PlaceDatabase.query(bounds.southwest.latitude, bounds.northeast.latitude, bounds.southwest.longitude, bounds.northeast.longitude, LIMIT);
         final double queryTime = (System.nanoTime() - startTime) * 10E-9;
         if(results != null) {
             Log.w(TAG, String.format("Query returned %d results (%.3fs)", results.size(), queryTime));
