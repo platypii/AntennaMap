@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.support.v4.content.ContextCompat;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -18,16 +17,14 @@ class Assets {
     static BitmapDescriptor getSizedIcon(Context context, double height) {
         final float density = context.getResources().getDisplayMetrics().density;
         final int index = (int)(height / 100);
-        if(sizedIcons[index] == null) {
+        if (sizedIcons[index] == null) {
             // Generate icon
             final int size = (int) ((14 + index * 5) * density);
-            final Drawable drawable = ContextCompat.getDrawable(context, R.mipmap.ic_launcher);
-            if(drawable != null) {
-                final Bitmap bitmap = ((BitmapDrawable) (drawable)).getBitmap();
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                    bitmap.setHasMipMap(true);
-                }
-                final Bitmap bitmapScaled = Bitmap.createScaledBitmap(bitmap, size, size, false);
+            final Drawable drawable = ContextCompat.getDrawable(context, R.drawable.a);
+            if (drawable != null && drawable instanceof BitmapDrawable) {
+                final BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
+                final Bitmap bitmap = bitmapDrawable.getBitmap();
+                final Bitmap bitmapScaled = Bitmap.createScaledBitmap(bitmap, size * 3 / 4, size, false);
                 sizedIcons[index] = BitmapDescriptorFactory.fromBitmap(bitmapScaled);
             } else {
                 return null; // Should never happen
