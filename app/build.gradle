@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'io.fabric'
 
 android {
     compileSdkVersion 27
@@ -24,7 +25,9 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.support:appcompat-v7:27.0.2'
     compile 'com.google.android.gms:play-services-maps:11.6.2'
-    compile 'com.google.firebase:firebase-crash:11.6.2'
+    compile('com.crashlytics.sdk.android:crashlytics:2.7.1@aar') {
+        transitive = true;
+    }
     implementation 'com.android.support:support-annotations:27.0.2'
 }
 

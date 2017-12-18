@@ -2,7 +2,7 @@ package com.platypii.asr;
 
 import android.os.AsyncTask;
 import android.util.Log;
-import com.google.firebase.crash.FirebaseCrash;
+import com.crashlytics.android.Crashlytics;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -75,7 +75,7 @@ class PlaceDownload {
                 }
             } catch(IOException e) {
                 Log.e("PlaceFile", "Download error: " + e, e);
-                FirebaseCrash.report(e);
+                Crashlytics.logException(e);
                 return null;
             }
         }
@@ -132,7 +132,7 @@ class PlaceDownload {
                 return true;
             } catch(IOException e) {
                 Log.e(TAG, "Download failed: ", e);
-                FirebaseCrash.report(e);
+                Crashlytics.logException(e);
                 return false;
             }
         }

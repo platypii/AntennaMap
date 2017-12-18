@@ -3,7 +3,7 @@ package com.platypii.asr;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.util.Log;
-import com.google.firebase.crash.FirebaseCrash;
+import com.crashlytics.android.Crashlytics;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -41,7 +41,7 @@ class PlaceFile {
                     Log.i(TAG, "Copied default cache file from resources");
                 } catch (IOException e) {
                     Log.e(TAG, "Error copying default cache file from resources", e);
-                    FirebaseCrash.report(e);
+                    Crashlytics.logException(e);
                 }
             }
         }
@@ -121,7 +121,7 @@ class PlaceFile {
                         nextLine = reader.readLine();
                     } catch (IOException e) {
                         Log.e(TAG, "Error reading file", e);
-                        FirebaseCrash.report(e);
+                        Crashlytics.logException(e);
                     }
                 }
 
@@ -165,7 +165,7 @@ class PlaceFile {
             return new Place(id, latitude, longitude, altitude);
         } catch(Exception e) {
             Log.e(TAG, "Failed to parse line " + line, e);
-            FirebaseCrash.report(e);
+            Crashlytics.logException(e);
             return null;
         }
     }
