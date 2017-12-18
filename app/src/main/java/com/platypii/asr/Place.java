@@ -1,5 +1,6 @@
 package com.platypii.asr;
 
+import android.support.annotation.NonNull;
 import com.google.android.gms.maps.model.LatLng;
 
 class Place {
@@ -16,10 +17,12 @@ class Place {
 		this.altitude = altitude;
 	}
 
+    @NonNull
     LatLng latLng() {
         return new LatLng(latitude, longitude);
     }
 
+    @NonNull
     String url() {
         return "http://wireless2.fcc.gov/UlsApp/AsrSearch/asrRegistration.jsp?regKey=" + id;
     }

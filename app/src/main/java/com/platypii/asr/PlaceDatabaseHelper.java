@@ -3,6 +3,7 @@ package com.platypii.asr;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 class PlaceDatabaseHelper extends SQLiteOpenHelper {
@@ -24,7 +25,7 @@ class PlaceDatabaseHelper extends SQLiteOpenHelper {
     }
 
     @Override
-    public void onCreate(SQLiteDatabase database) {
+    public void onCreate(@NonNull SQLiteDatabase database) {
         Log.w(TAG, "Creating database");
         database.execSQL(DATABASE_CREATE);
         database.execSQL("CREATE INDEX latitude_index ON place(latitude)");
@@ -32,7 +33,7 @@ class PlaceDatabaseHelper extends SQLiteOpenHelper {
     }
 
     @Override
-    public void onUpgrade(SQLiteDatabase database, int oldVersion, int newVersion) {
+    public void onUpgrade(@NonNull SQLiteDatabase database, int oldVersion, int newVersion) {
         Log.w(TAG, "Upgrading database from version " + oldVersion + " to " + newVersion + ", which will destroy all old data");
         database.execSQL("DROP TABLE IF EXISTS asr");
         database.execSQL("DROP TABLE IF EXISTS place");

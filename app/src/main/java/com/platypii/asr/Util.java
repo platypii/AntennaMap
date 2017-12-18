@@ -1,5 +1,6 @@
 package com.platypii.asr;
 
+import android.support.annotation.NonNull;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -7,7 +8,7 @@ import java.io.InputStream;
 
 class Util {
 
-    static void copy(InputStream inputStream, File outputFile) throws IOException {
+    static void copy(@NonNull InputStream inputStream, @NonNull File outputFile) throws IOException {
         // create a buffer...
         final byte[] buffer = new byte[1024];
         int bufferLength; // used to store temporary size of the buffer

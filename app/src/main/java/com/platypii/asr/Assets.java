@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -14,7 +15,7 @@ class Assets {
     // sizedIcons[1] = 1..200m
     private static final BitmapDescriptor sizedIcons[] = new BitmapDescriptor[7];
 
-    static BitmapDescriptor getSizedIcon(Context context, double height) {
+    static BitmapDescriptor getSizedIcon(@NonNull Context context, double height) {
         final float density = context.getResources().getDisplayMetrics().density;
         final int index = (int)(height / 100);
         if (sizedIcons[index] == null) {

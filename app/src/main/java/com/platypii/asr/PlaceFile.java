@@ -1,6 +1,7 @@
 package com.platypii.asr;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import com.google.firebase.crash.FirebaseCrash;
 import java.io.BufferedReader;
@@ -21,7 +22,7 @@ class PlaceFile {
 
     static File cacheFile;
 
-    static void start(Context appContext) {
+    static void start(@NonNull Context appContext) {
         // Get reference to cache file
         if(cacheFile != null) {
             Log.e(TAG, "Already loaded");
@@ -150,7 +151,7 @@ class PlaceFile {
     /**
      * Parse a CSV line into a place
      */
-    private static Place parseLine(String line) {
+    private static Place parseLine(@NonNull String line) {
         final String[] split = line.split(",");
         if(split.length < 4 || split[0].equals("") || split[1].equals("") || split[2].equals("") || split[3].equals("")) {
             Log.w(TAG, "Failed to parse line " + line);

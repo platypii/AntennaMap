@@ -80,7 +80,7 @@ public class MapsActivity extends Activity implements GoogleMap.OnCameraMoveList
      * This should only be called once and when we are sure that {@link #map} is not null.
      */
     @Override
-    public void onMapReady(GoogleMap map) {
+    public void onMapReady(@NonNull GoogleMap map) {
         this.map = map;
         map.setMapType(GoogleMap.MAP_TYPE_HYBRID);
         if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
