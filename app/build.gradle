@@ -9,8 +9,8 @@ android {
         applicationId "com.platypii.asr"
         minSdkVersion 16
         targetSdkVersion 27
-        versionCode 10
-        versionName "1.7"
+        versionCode 11
+        versionName "1.8-beta"
     }
     buildTypes {
         release {
