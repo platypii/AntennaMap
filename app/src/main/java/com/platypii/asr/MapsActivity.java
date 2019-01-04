@@ -67,7 +67,7 @@ public class MapsActivity extends Activity implements GoogleMap.OnCameraMoveList
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if(mProgressDialog != null) {
+        if (mProgressDialog != null) {
             mProgressDialog.dismiss();
             mProgressDialog = null;
         }
@@ -83,11 +83,11 @@ public class MapsActivity extends Activity implements GoogleMap.OnCameraMoveList
     public void onMapReady(@NonNull GoogleMap map) {
         this.map = map;
         map.setMapType(GoogleMap.MAP_TYPE_HYBRID);
-        if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             // Enable location on map
             try {
                 map.setMyLocationEnabled(true);
-            } catch(SecurityException e) {
+            } catch (SecurityException e) {
                 Log.e(TAG, "Error enabling location", e);
             }
         } else {
@@ -126,14 +126,14 @@ public class MapsActivity extends Activity implements GoogleMap.OnCameraMoveList
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if(requestCode == MY_PERMISSIONS_REQUEST_LOCATION) {
-            if(grantResults.length == 1 &&
+        if (requestCode == MY_PERMISSIONS_REQUEST_LOCATION) {
+            if (grantResults.length == 1 &&
                     Manifest.permission.ACCESS_FINE_LOCATION.equals(permissions[0]) &&
                     grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                if(map != null) {
+                if (map != null) {
                     try {
                         map.setMyLocationEnabled(true);
-                    } catch(SecurityException e) {
+                    } catch (SecurityException e) {
                         Log.e(TAG, "Error enabling location", e);
                     }
                 }
@@ -141,15 +141,17 @@ public class MapsActivity extends Activity implements GoogleMap.OnCameraMoveList
         }
     }
 
-    /** Gets the users most recent location */
+    /**
+     * Gets the users most recent location
+     */
     private Location getMyLocation() {
         Location myLocation = null;
 
         // Get location from GPS if it's available
-        final LocationManager lm = (LocationManager)getSystemService(LOCATION_SERVICE);
+        final LocationManager lm = (LocationManager) getSystemService(LOCATION_SERVICE);
         try {
             myLocation = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        } catch(SecurityException e) {
+        } catch (SecurityException e) {
             Log.w(TAG, "Permission denied for GPS location");
         }
 
@@ -159,7 +161,7 @@ public class MapsActivity extends Activity implements GoogleMap.OnCameraMoveList
             criteria.setAccuracy(Criteria.ACCURACY_COARSE);
             // Finds a provider that matches the criteria
             final String provider = lm.getBestProvider(criteria, true);
-            if(provider != null) {
+            if (provider != null) {
                 // Use the provider to get the last known location
                 try {
                     myLocation = lm.getLastKnownLocation(provider);
@@ -171,9 +173,9 @@ public class MapsActivity extends Activity implements GoogleMap.OnCameraMoveList
             }
         }
 
-        if(myLocation == null) {
+        if (myLocation == null) {
             return null;
-        } else if(Math.abs(myLocation.getLatitude()) < 0.01 && Math.abs(myLocation.getLongitude()) < 0.01) {
+        } else if (Math.abs(myLocation.getLatitude()) < 0.01 && Math.abs(myLocation.getLongitude()) < 0.01) {
             // Unlikely coordinate
             return null;
         } else {
@@ -190,8 +192,9 @@ public class MapsActivity extends Activity implements GoogleMap.OnCameraMoveList
      * Class to update map only once every QUERY_WAIT_TIME milliseconds
      */
     private final Runnable runnable = new Runnable() {
-        @Override public void run() {
-            if(System.currentTimeMillis() < lastDrag + QUERY_WAIT_TIME) {
+        @Override
+        public void run() {
+            if (System.currentTimeMillis() < lastDrag + QUERY_WAIT_TIME) {
                 mUpdateMap();
                 // Schedule again
                 handler.postDelayed(runnable, QUERY_WAIT_TIME);
@@ -220,18 +223,19 @@ public class MapsActivity extends Activity implements GoogleMap.OnCameraMoveList
      */
     private void mapMoved() {
         lastDrag = System.currentTimeMillis();
-        if(!running) {
+        if (!running) {
             running = true;
             runnable.run();
         }
     }
 
-    private final HashMap<Place,Marker> markers = new HashMap<>();
+    private final HashMap<Place, Marker> markers = new HashMap<>();
     private boolean querying = false;
+
     private void mUpdateMap() {
-        if(map == null) {
+        if (map == null) {
             Log.e(TAG, "Update called, but map not ready");
-        } else if(querying) {
+        } else if (querying) {
             Log.w(TAG, "Update called, but still querying");
             mapMoved(); // Ensure that we retry
         } else {
@@ -247,8 +251,9 @@ public class MapsActivity extends Activity implements GoogleMap.OnCameraMoveList
             }
         }
     }
+
     public static void updateMap() {
-        if(instance != null) {
+        if (instance != null) {
             instance.mUpdateMap();
         }
     }
@@ -308,8 +313,8 @@ public class MapsActivity extends Activity implements GoogleMap.OnCameraMoveList
     public void onInfoWindowClick(Marker marker) {
         Log.w(TAG, "Clicked marker info");
         // Find which marker
-        for(Map.Entry<Place,Marker> entry : markers.entrySet()) {
-            if(entry.getValue().equals(marker)) {
+        for (Map.Entry<Place, Marker> entry : markers.entrySet()) {
+            if (entry.getValue().equals(marker)) {
                 final Place place = entry.getKey();
                 // Open url
                 Log.w(TAG, "Opening url for tower " + place.id);
@@ -319,8 +324,11 @@ public class MapsActivity extends Activity implements GoogleMap.OnCameraMoveList
         }
     }
 
-    /** Progress spinner stuff */
+    /**
+     * Progress spinner stuff
+     */
     private ProgressDialog mProgressDialog;
+
     public static void startProgress(String message) {
         if (instance != null) {
             instance.mProgressDialog = new ProgressDialog(instance);
@@ -332,9 +340,10 @@ public class MapsActivity extends Activity implements GoogleMap.OnCameraMoveList
             instance.mProgressDialog.show();
         }
     }
+
     public static void updateProgress(String message, int progress, int total) {
         if (instance != null) {
-            if(instance.mProgressDialog == null) {
+            if (instance.mProgressDialog == null) {
                 instance.mProgressDialog = new ProgressDialog(instance);
                 instance.mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
                 instance.mProgressDialog.setCancelable(false);
@@ -351,6 +360,7 @@ public class MapsActivity extends Activity implements GoogleMap.OnCameraMoveList
             }
         }
     }
+
     public static void dismissProgress() {
         if (instance != null && instance.mProgressDialog != null && instance.mProgressDialog.isShowing()) {
             instance.mProgressDialog.dismiss();

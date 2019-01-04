@@ -15,10 +15,12 @@ class PlaceDownload {
     private static final String fileUrl = "https://platypii.s3.amazonaws.com/asr/v1/asr.csv.gz";
     // private static final String fileUrl = "https://platypii.s3.amazonaws.com/asr/v1/asr-dev.csv.gz";
 
-    /** Check for new place file, and if necessary, download and reload new data */
+    /**
+     * Check for new place file, and if necessary, download and reload new data
+     */
     static void updateAsync() {
-        if(PlaceFile.cacheFile != null) {
-            if(PlaceFile.cacheFile.exists()) {
+        if (PlaceFile.cacheFile != null) {
+            if (PlaceFile.cacheFile.exists()) {
                 Log.w(TAG, "Checking for latest place file");
                 // Check for newer version in S3
                 new CheckETagTask().execute();
@@ -47,7 +49,7 @@ class PlaceDownload {
                 // Check size and eTag
                 final int remoteSize = connection.getContentLength();
                 String remoteTag = connection.getHeaderField("ETag");
-                if(remoteTag != null) {
+                if (remoteTag != null) {
                     remoteTag = remoteTag.replace("\"", "");
                 }
 
@@ -58,14 +60,14 @@ class PlaceDownload {
 
                 Log.i(TAG, "Local:  size = " + localSize + ", eTag = " + localTag);
 
-                if(remoteTag == null) {
+                if (remoteTag == null) {
                     Log.e(TAG, "Missing eTag");
                     return false;
-                } else if(localSize != remoteSize) {
+                } else if (localSize != remoteSize) {
                     Log.w(TAG, "Cache length and remote length differ");
                     return false;
                 } else {
-                    if(!remoteTag.equals(localTag)) {
+                    if (!remoteTag.equals(localTag)) {
                         Log.w(TAG, "MD5 does not match " + remoteTag + " != " + localTag);
                         return false;
                     } else {
@@ -73,19 +75,20 @@ class PlaceDownload {
                         return true;
                     }
                 }
-            } catch(IOException e) {
+            } catch (IOException e) {
                 Log.e("PlaceFile", "Download error: " + e, e);
                 Crashlytics.logException(e);
                 return null;
             }
         }
+
         @Override
         protected void onPostExecute(Boolean eTagMatches) {
-            if(eTagMatches != null && !eTagMatches) {
+            if (eTagMatches != null && !eTagMatches) {
                 // Newer version available for download
                 Log.w(TAG, "New place file found");
                 new DownloadTask().execute();
-            } else if(ASR.reloadRequired) {
+            } else if (ASR.reloadRequired) {
                 // Latest version already downloaded, but reload required
                 ASR.fileLoaded();
             }
@@ -99,6 +102,7 @@ class PlaceDownload {
         protected void onPreExecute() {
             MapsActivity.startProgress("Downloading data...");
         }
+
         @Override
         protected Boolean doInBackground(Void... params) {
             try {
@@ -119,7 +123,7 @@ class PlaceDownload {
 
                 // now, read through the input buffer and write the contents to the file
                 final FileOutputStream fileOutput = new FileOutputStream(PlaceFile.cacheFile);
-                while( (bufferLength = inputStream.read(buffer)) > 0 ) {
+                while ((bufferLength = inputStream.read(buffer)) > 0) {
                     // add the data in the buffer to the file in the file output stream (the file on the sd card
                     fileOutput.write(buffer, 0, bufferLength);
                     // add up the size so we know how much is downloaded
@@ -130,21 +134,23 @@ class PlaceDownload {
                 fileOutput.close();
                 Log.w(TAG, "Downloaded place file");
                 return true;
-            } catch(IOException e) {
+            } catch (IOException e) {
                 Log.e(TAG, "Download failed: ", e);
                 Crashlytics.logException(e);
                 return false;
             }
         }
+
         @Override
         protected void onProgressUpdate(Integer... progress) {
             super.onProgressUpdate(progress);
             MapsActivity.updateProgress("Downloading data...", progress[0], totalSize);
         }
+
         @Override
         protected void onPostExecute(Boolean success) {
             MapsActivity.dismissProgress();
-            if(success) {
+            if (success) {
                 ASR.fileLoaded();
             }
         }

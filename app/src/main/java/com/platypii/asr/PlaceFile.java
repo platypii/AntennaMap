@@ -24,14 +24,14 @@ class PlaceFile {
 
     static void start(@NonNull Context appContext) {
         // Get reference to cache file
-        if(cacheFile != null) {
+        if (cacheFile != null) {
             Log.e(TAG, "Already loaded");
         } else {
             final File cacheDir = appContext.getExternalCacheDir();
             cacheFile = new File(cacheDir, "places.csv.gz");
             Log.i(TAG, "Using place file " + cacheFile);
             // Check if file exists
-            if(!cacheFile.exists()) {
+            if (!cacheFile.exists()) {
                 // Fresh install, load default file from resources
                 Log.w(TAG, "Cache file does not exist, using default");
                 try {
@@ -47,7 +47,9 @@ class PlaceFile {
         }
     }
 
-    /** Scan the cache file for length and MD5 */
+    /**
+     * Scan the cache file for length and MD5
+     */
     static String md5() {
         if (cacheFile == null) {
             Log.e(TAG, "Not initialized");
@@ -57,7 +59,7 @@ class PlaceFile {
                 final MessageDigest md = MessageDigest.getInstance("MD5");
                 final InputStream inputStream = new DigestInputStream(new FileInputStream(cacheFile), md);
                 final byte[] buffer = new byte[1024];
-                while(inputStream.read(buffer) != -1) {
+                while (inputStream.read(buffer) != -1) {
                     // Do nothing
                 }
                 inputStream.close();
@@ -66,7 +68,7 @@ class PlaceFile {
             } catch (NoSuchAlgorithmException e) {
                 Log.e(TAG, "Failed to compute MD5", e);
                 return null;
-            } catch(IOException e) {
+            } catch (IOException e) {
                 Log.e(TAG, "Failed to read place file", e);
                 return null;
             }
@@ -88,16 +90,16 @@ class PlaceFile {
                 final byte[] buffer = new byte[4096];
                 int bufferLength;
                 int count = 0;
-                while((bufferLength = inputStream.read(buffer)) != -1) {
-                    for(int i = 0; i < bufferLength; i++) {
-                        if(buffer[i] == '\n') {
+                while ((bufferLength = inputStream.read(buffer)) != -1) {
+                    for (int i = 0; i < bufferLength; i++) {
+                        if (buffer[i] == '\n') {
                             count++;
                         }
                     }
                 }
                 inputStream.close();
                 return count;
-            } catch(IOException e) {
+            } catch (IOException e) {
                 Log.e(TAG, "Failed to read place file", e);
                 return -1;
             }
@@ -105,7 +107,7 @@ class PlaceFile {
     }
 
     static Iterator<Place> iterator() {
-        if(cacheFile == null) {
+        if (cacheFile == null) {
             Log.e(TAG, "Not initialized");
             return null;
         } else {
@@ -153,7 +155,7 @@ class PlaceFile {
      */
     private static Place parseLine(@NonNull String line) {
         final String[] split = line.split(",");
-        if(split.length < 4 || split[0].equals("") || split[1].equals("") || split[2].equals("") || split[3].equals("")) {
+        if (split.length < 4 || split[0].equals("") || split[1].equals("") || split[2].equals("") || split[3].equals("")) {
             Log.w(TAG, "Failed to parse line " + line);
             return null;
         }
@@ -163,7 +165,7 @@ class PlaceFile {
             final double longitude = Double.parseDouble(split[2]) / 3600.0;
             final double altitude = Double.parseDouble(split[3]);
             return new Place(id, latitude, longitude, altitude);
-        } catch(Exception e) {
+        } catch (Exception e) {
             Log.e(TAG, "Failed to parse line " + line, e);
             Crashlytics.logException(e);
             return null;

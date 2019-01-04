@@ -33,12 +33,14 @@ class PlaceDatabase {
         }
     }
 
-    /** Return true iff there is data ready to query */
+    /**
+     * Return true iff there is data ready to query
+     */
     static boolean isReady() {
-        if(!started) {
+        if (!started) {
             Log.i(TAG, "Not ready: database is not started");
             return false;
-        } else if(loading) {
+        } else if (loading) {
             Log.i(TAG, "Not ready: database is loading");
             return false;
         } else {
@@ -142,7 +144,7 @@ class PlaceDatabase {
      * Search for the N tallest towers in view
      */
     static List<Place> query(double minLatitude, double maxLatitude, double minLongitude, double maxLongitude, int limit) {
-        if(started && !loading) {
+        if (started && !loading) {
             final String params[] = {
                     Double.toString(minLatitude),
                     Double.toString(maxLatitude),
@@ -169,7 +171,7 @@ class PlaceDatabase {
             }
             cursor.close();
             return records;
-        } else if(loading) {
+        } else if (loading) {
             Log.w(TAG, "Query attempted while still loading");
             return null;
         } else {

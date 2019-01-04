@@ -18,12 +18,12 @@ class ASR {
     static void init(@NonNull Context appContext) {
         // Start the database
         PlaceDatabase.start(appContext);
-        if(!PlaceDatabase.isReady()) {
+        if (!PlaceDatabase.isReady()) {
             reloadRequired = true;
         }
         PlaceFile.start(appContext);
         PlaceDownload.updateAsync();
-        if(PlaceDatabase.isReady()) {
+        if (PlaceDatabase.isReady()) {
             ASR.ready();
         }
     }
@@ -46,7 +46,7 @@ class ASR {
         final long startTime = System.nanoTime();
         final List<Place> results = PlaceDatabase.query(bounds.southwest.latitude, bounds.northeast.latitude, bounds.southwest.longitude, bounds.northeast.longitude, LIMIT);
         final double queryTime = (System.nanoTime() - startTime) * 10E-9;
-        if(results != null) {
+        if (results != null) {
             Log.w(TAG, String.format("Query returned %d results (%.3fs)", results.size(), queryTime));
         } else {
             Log.e(TAG, "Query returned null!");

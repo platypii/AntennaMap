@@ -17,12 +17,12 @@ class Assets {
 
     static BitmapDescriptor getSizedIcon(@NonNull Context context, double height) {
         final float density = context.getResources().getDisplayMetrics().density;
-        final int index = (int)(height / 100);
+        final int index = (int) (height / 100);
         if (sizedIcons[index] == null) {
             // Generate icon
             final int size = (int) ((14 + index * 5) * density);
             final Drawable drawable = ContextCompat.getDrawable(context, R.drawable.a);
-            if (drawable != null && drawable instanceof BitmapDrawable) {
+            if (drawable instanceof BitmapDrawable) {
                 final BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
                 final Bitmap bitmap = bitmapDrawable.getBitmap();
                 final Bitmap bitmapScaled = Bitmap.createScaledBitmap(bitmap, size * 3 / 4, size, false);
