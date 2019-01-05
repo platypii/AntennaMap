@@ -1,0 +1,15 @@
+#!/bin/bash
+
+set -e
+
+CSV_FILE=data/antennas.csv
+GZ_FILE=data/antennas.csv.gz
+S3_FILE=s3://platypii/antennas/v1/antennas.csv.gz
+
+# GZip the CSV
+gzip -c $CSV_FILE > $GZ_FILE
+
+# Upload to S3
+echo "Uploading to S3"
+s3cmd put $GZ_FILE $S3_FILE
+s3cmd setacl --acl-public $S3_FILE

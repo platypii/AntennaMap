@@ -1,43 +1,37 @@
-#!/bin/bash
+#!/usr/bin/python3
 
-set -e
+import csv
+import pandas as pd
+import numpy as np
 
-# Sorting order
-export LC_ALL=C
+# row[4]: Unique System Identifier
+# row[5]: Coordinate Type, A=Array, T=Tower
+# row[9]: Latitude Direction
+# row[10]: Latitude
+# row[14]: Longitude Direction
+# row[15]: Longitude
+# row[23]: Status Code, T=Terminated, G=Granted, C=Constructed, A=Cancelled, I=Dismantled
+# row[45]: Height
+# row[47]: GTOWER / LTOWER=LatticeTower / MAST / MTOWER / POLE / TANK / TOWER
 
-echo "Filtering data"
+# Parse data/asr-full.csv
+with open('data/asr-full.csv', encoding='ISO-8859-1') as infile:
+    df = pd.read_csv(infile, sep='|', index_col=False, usecols=[4,5,9,10,14,15,23,45])
+    # Include only constructed towers, of adequate height
+    df = df[df['Coordinate Type'] == "T"]
+    df = df[df['Status Code'] == "C"]
+    df = df[df['Overall Height Above Ground'] >= 45.72]
+    # Compute lat,lon
+    df['lat'] = np.where(df['Latitude Direction'] == 'N', df['Latitude_Total_Seconds'], "-" + df['Latitude_Total_Seconds']).astype(float) / 3600
+    df['lon'] = np.where(df['Longitude Direction'] == 'E', df['Longitude_Total_Seconds'], "-" + df['Longitude_Total_Seconds']).astype(float) / 3600
+    df['height'] = df['Overall Height Above Ground'].astype(str)
+    df['url'] = 'https://wireless2.fcc.gov/UlsApp/AsrSearch/asrRegistration.jsp?regKey=' + df['Unique System Identifier'].astype(str)
+    # Sort
+    df = df.sort_values('Overall Height Above Ground', ascending=False)
+    # Select columns
+    df = df[['lat', 'lon', 'height', 'url']]
 
-echo 'ID,Latitude,Longitude,Height' > data/asr-tmp.csv
-# cut -d'|' -f 5,11,16,46,24 asr.csv | sort -t'|' -k4 -r -g | sed 's/|/,/g' | uniq | head -111475 >> asr-min.csv
+    # Write CSV
+    df.to_csv('data/antennas.csv', index=False, float_format='%.6f')
 
-# $5: Unique System Identifier
-# $6: Coordinate Type, A=Array, T=Tower
-# $10: Latitude Direction
-# $11: Latitude
-# $15: Longitude Direction
-# $16: Longitude
-# $24: T=Terminated, G=Granted, C=Constructed, A=Cancelled, I=Dismantled
-# $46: Height
-# $48: GTOWER / LTOWER=LatticeTower / MAST / MTOWER / POLE / TANK / TOWER
-awk -F'|' '{
-    if($6 == "T" && $24 == "C" && $11 != "" && $16 != "" && $16 != "0.0") {
-        printf("%s,", $5);
-        if($10 == "N")
-            printf("%s",$11);
-        else
-            printf("-%s",$11);
-        printf ",";
-        if($15 == "W")
-            printf("-%s",$16);
-        else
-            printf("%s",$16);
-        print "," $46;
-    }
-}' data/asr-full.csv | sort -t',' -k4 -r -g >> data/asr-tmp.csv
-
-# Remove dups and trim
-awk -F',' '{ if(a[$1]++ == 0 && $4 >= 45.72) print }' data/asr-tmp.csv > data/asr.csv
-
-# GZip
-echo "Zipping data"
-gzip -c data/asr.csv > data/asr.csv.gz
+    print(df)
