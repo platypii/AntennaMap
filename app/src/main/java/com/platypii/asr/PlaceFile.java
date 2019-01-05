@@ -35,7 +35,7 @@ class PlaceFile {
                 // Fresh install, load default file from resources
                 Log.w(TAG, "Cache file does not exist, using default");
                 try {
-                    final InputStream defaultCacheFile = appContext.getResources().openRawResource(R.raw.asr_csv_gz);
+                    final InputStream defaultCacheFile = appContext.getResources().openRawResource(R.raw.antennas_csv_gz);
                     Util.copy(defaultCacheFile, cacheFile);
                     ASR.reloadRequired = true;
                     Log.i(TAG, "Copied default cache file from resources");
@@ -155,16 +155,16 @@ class PlaceFile {
      */
     private static Place parseLine(@NonNull String line) {
         final String[] split = line.split(",");
-        if (split.length < 4 || split[0].equals("") || split[1].equals("") || split[2].equals("") || split[3].equals("")) {
+        if (split.length != 4 || split[0].equals("") || split[1].equals("") || split[2].equals("")) {
             Log.w(TAG, "Failed to parse line " + line);
             return null;
         }
         try {
-            final long id = Long.parseLong(split[0]);
-            final double latitude = Double.parseDouble(split[1]) / 3600.0;
-            final double longitude = Double.parseDouble(split[2]) / 3600.0;
-            final double altitude = Double.parseDouble(split[3]);
-            return new Place(id, latitude, longitude, altitude);
+            final double latitude = Double.parseDouble(split[0]);
+            final double longitude = Double.parseDouble(split[1]);
+            final double altitude = Double.parseDouble(split[2]);
+            final String url = split[3];
+            return new Place(latitude, longitude, altitude, url);
         } catch (Exception e) {
             Log.e(TAG, "Failed to parse line " + line, e);
             Crashlytics.logException(e);

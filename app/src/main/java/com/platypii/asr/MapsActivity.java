@@ -317,8 +317,8 @@ public class MapsActivity extends Activity implements GoogleMap.OnCameraMoveList
             if (entry.getValue().equals(marker)) {
                 final Place place = entry.getKey();
                 // Open url
-                Log.w(TAG, "Opening url for tower " + place.id);
-                final Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(place.url()));
+                Log.w(TAG, "Opening url for tower " + place.url);
+                final Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(place.url));
                 startActivity(browserIntent);
             }
         }

@@ -10,14 +10,14 @@ class PlaceDatabaseHelper extends SQLiteOpenHelper {
     private static final String TAG = "PlaceDatabaseHelper";
 
     private static final String DATABASE_NAME = "places.db";
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 3;
 
     // Database creation sql statement
     private static final String DATABASE_CREATE = "CREATE TABLE place (" +
-            "id INTEGER PRIMARY KEY," +
             "latitude FLOAT," +
             "longitude FLOAT," +
-            "altitude FLOAT" +
+            "altitude FLOAT," +
+            "url VARCHAR(80)" +
             ")";
 
     PlaceDatabaseHelper(Context context) {
@@ -35,7 +35,6 @@ class PlaceDatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(@NonNull SQLiteDatabase database, int oldVersion, int newVersion) {
         Log.w(TAG, "Upgrading database from version " + oldVersion + " to " + newVersion + ", which will destroy all old data");
-        database.execSQL("DROP TABLE IF EXISTS asr");
         database.execSQL("DROP TABLE IF EXISTS place");
         onCreate(database);
     }

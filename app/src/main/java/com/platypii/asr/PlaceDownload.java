@@ -12,8 +12,7 @@ import javax.net.ssl.HttpsURLConnection;
 class PlaceDownload {
     private static final String TAG = "PlaceDownload";
 
-    private static final String fileUrl = "https://platypii.s3.amazonaws.com/asr/v1/asr.csv.gz";
-    // private static final String fileUrl = "https://platypii.s3.amazonaws.com/asr/v1/asr-dev.csv.gz";
+    private static final String fileUrl = "https://platypii.s3.amazonaws.com/antennas/v1/antennas.csv.gz";
 
     /**
      * Check for new place file, and if necessary, download and reload new data

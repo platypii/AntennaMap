@@ -53,7 +53,7 @@ class PlaceDatabase {
 
     private static int getRows() {
         // Assumes started and not loading
-        final Cursor cursor = database.rawQuery("SELECT COUNT(id) FROM place", null);
+        final Cursor cursor = database.rawQuery("SELECT COUNT(*) FROM place", null);
         cursor.moveToFirst();
         final int rows = cursor.getInt(0);
         cursor.close();
@@ -98,15 +98,16 @@ class PlaceDatabase {
             writableDatabase.beginTransaction();
             writableDatabase.execSQL("DELETE FROM place");
             // Prepared statement
-            final SQLiteStatement insertStatement = writableDatabase.compileStatement("INSERT OR IGNORE INTO place VALUES (?,?,?,?)");
+            final String insertString = "INSERT INTO place (latitude, longitude, altitude, url) VALUES (?,?,?,?)";
+            final SQLiteStatement insertStatement = writableDatabase.compileStatement(insertString);
             while (places.hasNext()) {
                 final Place record = places.next();
                 if (record != null) {
                     // Add to database
-                    insertStatement.bindLong(1, record.id);
-                    insertStatement.bindDouble(2, record.latitude);
-                    insertStatement.bindDouble(3, record.longitude);
-                    insertStatement.bindDouble(4, record.altitude);
+                    insertStatement.bindDouble(1, record.latitude);
+                    insertStatement.bindDouble(2, record.longitude);
+                    insertStatement.bindDouble(3, record.altitude);
+                    insertStatement.bindString(4, record.url);
                     insertStatement.executeInsert();
                     // Update progress dialog
                     if (count % 100 == 0) {
@@ -156,17 +157,17 @@ class PlaceDatabase {
                     " AND ? < longitude AND longitude < ?" :
                     " AND ? < longitude OR longitude < ?";
             final Cursor cursor = database.rawQuery(
-                    "SELECT id, latitude, longitude, altitude FROM place" +
+                    "SELECT latitude, longitude, altitude, url FROM place" +
                             " WHERE ? < latitude AND latitude < ?" +
                             longitudeQuery +
                             " ORDER BY altitude DESC LIMIT ?", params);
             final ArrayList<Place> records = new ArrayList<>();
             while (cursor.moveToNext()) {
-                final long id = cursor.getLong(0);
-                final double latitude = cursor.getDouble(1);
-                final double longitude = cursor.getDouble(2);
-                final double altitude = cursor.getDouble(3);
-                final Place record = new Place(id, latitude, longitude, altitude);
+                final double latitude = cursor.getDouble(0);
+                final double longitude = cursor.getDouble(1);
+                final double altitude = cursor.getDouble(2);
+                final String url = cursor.getString(3);
+                final Place record = new Place(latitude, longitude, altitude, url);
                 records.add(record);
             }
             cursor.close();
