@@ -1,0 +1,43 @@
+#!/bin/bash
+
+set -e
+
+# Sorting order
+export LC_ALL=C
+
+echo "Filtering data"
+
+echo 'ID,Latitude,Longitude,Height' > data/asr-tmp.csv
+# cut -d'|' -f 5,11,16,46,24 asr.csv | sort -t'|' -k4 -r -g | sed 's/|/,/g' | uniq | head -111475 >> asr-min.csv
+
+# $5: Unique System Identifier
+# $6: Coordinate Type, A=Array, T=Tower
+# $10: Latitude Direction
+# $11: Latitude
+# $15: Longitude Direction
+# $16: Longitude
+# $24: T=Terminated, G=Granted, C=Constructed, A=Cancelled, I=Dismantled
+# $46: Height
+# $48: GTOWER / LTOWER=LatticeTower / MAST / MTOWER / POLE / TANK / TOWER
+awk -F'|' '{
+    if($6 == "T" && $24 == "C" && $11 != "" && $16 != "" && $16 != "0.0") {
+        printf("%s,", $5);
+        if($10 == "N")
+            printf("%s",$11);
+        else
+            printf("-%s",$11);
+        printf ",";
+        if($15 == "W")
+            printf("-%s",$16);
+        else
+            printf("%s",$16);
+        print "," $46;
+    }
+}' data/asr-full.csv | sort -t',' -k4 -r -g >> data/asr-tmp.csv
+
+# Remove dups and trim
+awk -F',' '{ if(a[$1]++ == 0 && $4 >= 45.72) print }' data/asr-tmp.csv > data/asr.csv
+
+# GZip
+echo "Zipping data"
+gzip -c data/asr.csv > data/asr.csv.gz

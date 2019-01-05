@@ -31,3 +31,6 @@ proguard/
 
 # Misc
 .DS_Store
+
+# Data files
+/asrdata/data
