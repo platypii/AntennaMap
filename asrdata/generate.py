@@ -1,0 +1,37 @@
+#!/usr/bin/python3
+
+import csv
+import pandas as pd
+import numpy as np
+
+# row[4]: Unique System Identifier
+# row[5]: Coordinate Type, A=Array, T=Tower
+# row[9]: Latitude Direction
+# row[10]: Latitude
+# row[14]: Longitude Direction
+# row[15]: Longitude
+# row[23]: Status Code, T=Terminated, G=Granted, C=Constructed, A=Cancelled, I=Dismantled
+# row[45]: Height
+# row[47]: GTOWER / LTOWER=LatticeTower / MAST / MTOWER / POLE / TANK / TOWER
+
+# Parse data/asr-full.csv
+with open('data/asr-full.csv', encoding='ISO-8859-1') as infile:
+    df = pd.read_csv(infile, sep='|', index_col=False, usecols=[4,5,9,10,14,15,23,45])
+    # Include only constructed towers, of adequate height
+    df = df[df['Coordinate Type'] == "T"]
+    df = df[df['Status Code'] == "C"]
+    df = df[df['Overall Height Above Ground'] >= 45.72]
+    # Compute lat,lon
+    df['lat'] = np.where(df['Latitude Direction'] == 'N', df['Latitude_Total_Seconds'], "-" + df['Latitude_Total_Seconds']).astype(float) / 3600
+    df['lon'] = np.where(df['Longitude Direction'] == 'E', df['Longitude_Total_Seconds'], "-" + df['Longitude_Total_Seconds']).astype(float) / 3600
+    df['height'] = df['Overall Height Above Ground'].astype(str)
+    df['url'] = 'https://wireless2.fcc.gov/UlsApp/AsrSearch/asrRegistration.jsp?regKey=' + df['Unique System Identifier'].astype(str)
+    # Sort
+    df = df.sort_values('Overall Height Above Ground', ascending=False)
+    # Select columns
+    df = df[['lat', 'lon', 'height', 'url']]
+
+    # Write CSV
+    df.to_csv('data/panda.csv', index=False, float_format='%.6f')
+
+    print(df)
