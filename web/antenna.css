@@ -11,10 +11,9 @@ body {
 
 .poweredby {
 	position: absolute;
-	top: 0;
-	right: 0;
-	margin: 10px;
+	bottom: 20px;
+	right: 55px;
 	padding: 5px;
-	background: rgba(255,255,255,0.7);
-	border-radius: 3px;
+	background: rgba(0,0,0,0.4);
+	border-radius: 5px;
 }
