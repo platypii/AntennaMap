@@ -154,8 +154,8 @@ class PlaceFile {
      * Parse a CSV line into a place
      */
     private static Place parseLine(@NonNull String line) {
-        final String[] split = line.split(",");
-        if (split.length != 4 || split[0].equals("") || split[1].equals("") || split[2].equals("")) {
+        final String[] split = line.split(",", 4);
+        if (split[0].equals("") || split[1].equals("") || split[2].equals("")) {
             Log.w(TAG, "Failed to parse line " + line);
             return null;
         }

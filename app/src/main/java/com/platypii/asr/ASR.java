@@ -10,7 +10,7 @@ import java.util.List;
 class ASR {
     private static final String TAG = "ASR";
 
-    private static final int LIMIT = 24;
+    private static final int LIMIT = 32;
 
     // Flag to indicate that cache file was loaded from resources, and needs to be reloaded
     static boolean reloadRequired = false;

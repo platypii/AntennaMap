@@ -17,7 +17,8 @@ class Assets {
 
     static BitmapDescriptor getSizedIcon(@NonNull Context context, double height) {
         final float density = context.getResources().getDisplayMetrics().density;
-        final int index = (int) (height / 100);
+        int index = (int) (height / 100);
+        if (index > 6) index = 6;
         if (sizedIcons[index] == null) {
             // Generate icon
             final int size = (int) ((14 + index * 5) * density);
