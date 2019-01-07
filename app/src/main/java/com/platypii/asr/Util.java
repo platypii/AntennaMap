@@ -11,6 +11,7 @@ import java.math.BigInteger;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.zip.GZIPInputStream;
 
 class Util {
 
@@ -40,6 +41,31 @@ class Util {
             }
             // Format digest as hex
             return String.format("%1$032x", new BigInteger(1, md.digest()));
+        } finally {
+            if (inputStream != null) {
+                inputStream.close();
+            }
+        }
+    }
+
+    /**
+     * Count the number of lines in a gzip file (as if it was unzipped).
+     */
+    static int lineCountGzip(File gzFile) throws IOException {
+        InputStream inputStream = null;
+        try {
+            inputStream = new GZIPInputStream(new FileInputStream(gzFile));
+            final byte[] buffer = new byte[4096];
+            int bufferLength;
+            int count = 0;
+            while ((bufferLength = inputStream.read(buffer)) != -1) {
+                for (int i = 0; i < bufferLength; i++) {
+                    if (buffer[i] == '\n') {
+                        count++;
+                    }
+                }
+            }
+            return count;
         } finally {
             if (inputStream != null) {
                 inputStream.close();

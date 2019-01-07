@@ -62,29 +62,11 @@ class PlaceFile {
     }
 
     static int rowCount() {
-        if (cacheFile == null) {
-            Log.e(TAG, "Not initialized");
+        try {
+            return Util.lineCountGzip(cacheFile);
+        } catch (IOException e) {
+            Log.e(TAG, "Failed to count lines of place file", e);
             return -1;
-        } else {
-            // Count rows in cache file
-            try {
-                final InputStream inputStream = new GZIPInputStream(new FileInputStream(cacheFile));
-                final byte[] buffer = new byte[4096];
-                int bufferLength;
-                int count = 0;
-                while ((bufferLength = inputStream.read(buffer)) != -1) {
-                    for (int i = 0; i < bufferLength; i++) {
-                        if (buffer[i] == '\n') {
-                            count++;
-                        }
-                    }
-                }
-                inputStream.close();
-                return count;
-            } catch (IOException e) {
-                Log.e(TAG, "Failed to read place file", e);
-                return -1;
-            }
         }
     }
 
