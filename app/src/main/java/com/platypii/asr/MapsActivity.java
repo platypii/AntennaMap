@@ -2,7 +2,6 @@ package com.platypii.asr;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -37,7 +36,8 @@ public class MapsActivity extends Activity implements GoogleMap.OnCameraMoveList
     private final Handler handler = new Handler();
 
     private GoogleMap map; // Might be null if Google Play services APK is not available.
-    private ProgressBar progressSpinner;
+    private ProgressBar progressSpinner; // Query spinner
+    private MyProgressBar progressBar; // Loading bar
 
     private static boolean firstLoad = true;
 
@@ -50,6 +50,7 @@ public class MapsActivity extends Activity implements GoogleMap.OnCameraMoveList
         // Find view elements
         progressSpinner = this.findViewById(R.id.progressSpinner);
         progressSpinner.setVisibility(ProgressBar.GONE);
+        progressBar = new MyProgressBar(this);
 
         // Initialize map
         final MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
@@ -65,10 +66,9 @@ public class MapsActivity extends Activity implements GoogleMap.OnCameraMoveList
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (mProgressDialog != null) {
-            mProgressDialog.dismiss();
-            mProgressDialog = null;
-        }
+        // Dismiss progress
+        progressBar.dismiss();
+        progressBar = null;
         // Don't leak this instance
         MapsActivity.instance = null;
     }
@@ -285,43 +285,21 @@ public class MapsActivity extends Activity implements GoogleMap.OnCameraMoveList
     /**
      * Progress spinner stuff
      */
-    private ProgressDialog mProgressDialog;
-
     public static void startProgress(String message) {
-        if (instance != null) {
-            instance.mProgressDialog = new ProgressDialog(instance);
-            instance.mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-            instance.mProgressDialog.setIndeterminate(true);
-            instance.mProgressDialog.setMax(1);
-            instance.mProgressDialog.setCancelable(false);
-            instance.mProgressDialog.setMessage(message);
-            instance.mProgressDialog.show();
+        if (instance != null && instance.progressBar != null) {
+            instance.progressBar.start(message);
         }
     }
 
     public static void updateProgress(String message, int progress, int total) {
-        if (instance != null) {
-            if (instance.mProgressDialog == null) {
-                instance.mProgressDialog = new ProgressDialog(instance);
-                instance.mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-                instance.mProgressDialog.setCancelable(false);
-                instance.mProgressDialog.setIndeterminate(false);
-                instance.mProgressDialog.setMax(total);
-                instance.mProgressDialog.setProgress(progress);
-                instance.mProgressDialog.setMessage(message);
-                instance.mProgressDialog.show();
-            } else {
-                instance.mProgressDialog.setIndeterminate(false);
-                instance.mProgressDialog.setMax(total);
-                instance.mProgressDialog.setProgress(progress);
-                instance.mProgressDialog.setMessage(message);
-            }
+        if (instance != null && instance.progressBar != null) {
+            instance.progressBar.update(message, progress, total);
         }
     }
 
     public static void dismissProgress() {
-        if (instance != null && instance.mProgressDialog != null && instance.mProgressDialog.isShowing()) {
-            instance.mProgressDialog.dismiss();
+        if (instance != null && instance.progressBar != null) {
+            instance.progressBar.dismiss();
         }
     }
 
