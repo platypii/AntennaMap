@@ -1,10 +1,16 @@
 package com.platypii.asr;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigInteger;
+import java.security.DigestInputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 class Util {
 
@@ -20,6 +26,25 @@ class Util {
             fileOutputStream.write(buffer, 0, bufferLength);
         }
         fileOutputStream.close();
+    }
+
+    @Nullable
+    static String md5(File file) throws NoSuchAlgorithmException, IOException {
+        InputStream inputStream = null;
+        final MessageDigest md = MessageDigest.getInstance("MD5");
+        try {
+            inputStream = new DigestInputStream(new FileInputStream(file), md);
+            final byte[] buffer = new byte[1024];
+            while (inputStream.read(buffer) != -1) {
+                // Do nothing
+            }
+            // Format digest as hex
+            return String.format("%1$032x", new BigInteger(1, md.digest()));
+        } finally {
+            if (inputStream != null) {
+                inputStream.close();
+            }
+        }
     }
 
 }

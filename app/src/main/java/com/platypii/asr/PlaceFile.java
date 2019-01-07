@@ -2,6 +2,7 @@ package com.platypii.asr;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import com.crashlytics.android.Crashlytics;
 import java.io.BufferedReader;
@@ -10,10 +11,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.math.BigInteger;
-import java.security.DigestInputStream;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Iterator;
 import java.util.zip.GZIPInputStream;
 
@@ -50,28 +47,13 @@ class PlaceFile {
     /**
      * Scan the cache file for length and MD5
      */
+    @Nullable
     static String md5() {
-        if (cacheFile == null) {
-            Log.e(TAG, "Not initialized");
+        try {
+            return Util.md5(cacheFile);
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to compute MD5 of place file", e);
             return null;
-        } else {
-            try {
-                final MessageDigest md = MessageDigest.getInstance("MD5");
-                final InputStream inputStream = new DigestInputStream(new FileInputStream(cacheFile), md);
-                final byte[] buffer = new byte[1024];
-                while (inputStream.read(buffer) != -1) {
-                    // Do nothing
-                }
-                inputStream.close();
-                // Format digest as hex
-                return String.format("%1$032x", new BigInteger(1, md.digest()));
-            } catch (NoSuchAlgorithmException e) {
-                Log.e(TAG, "Failed to compute MD5", e);
-                return null;
-            } catch (IOException e) {
-                Log.e(TAG, "Failed to read place file", e);
-                return null;
-            }
         }
     }
 
