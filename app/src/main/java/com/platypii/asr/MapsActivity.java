@@ -5,9 +5,7 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Criteria;
 import android.location.Location;
-import android.location.LocationManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -97,7 +95,7 @@ public class MapsActivity extends Activity implements GoogleMap.OnCameraMoveList
         }
         final LatLng center = map.getCameraPosition().target;
         if (firstLoad || (Math.abs(center.latitude) < 0.1 && Math.abs(center.longitude) < 0.1)) {
-            final Location myLocation = getMyLocation();
+            final Location myLocation = MyLocation.getMyLocation(this);
             if (myLocation != null
                     && 8 < myLocation.getLatitude() && myLocation.getLatitude() < 76
                     && -170 < myLocation.getLongitude() && myLocation.getLongitude() < -60) {
@@ -138,48 +136,6 @@ public class MapsActivity extends Activity implements GoogleMap.OnCameraMoveList
                     }
                 }
             }
-        }
-    }
-
-    /**
-     * Gets the users most recent location
-     */
-    private Location getMyLocation() {
-        Location myLocation = null;
-
-        // Get location from GPS if it's available
-        final LocationManager lm = (LocationManager) getSystemService(LOCATION_SERVICE);
-        try {
-            myLocation = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        } catch (SecurityException e) {
-            Log.w(TAG, "Permission denied for GPS location");
-        }
-
-        // Location wasn't found, check the next most accurate place for the current location
-        if (myLocation == null) {
-            final Criteria criteria = new Criteria();
-            criteria.setAccuracy(Criteria.ACCURACY_COARSE);
-            // Finds a provider that matches the criteria
-            final String provider = lm.getBestProvider(criteria, true);
-            if (provider != null) {
-                // Use the provider to get the last known location
-                try {
-                    myLocation = lm.getLastKnownLocation(provider);
-                } catch (SecurityException e) {
-                    Log.w(TAG, "Permission denied for GPS location");
-                }
-            } else {
-                Log.w(TAG, "No location provider found");
-            }
-        }
-
-        if (myLocation == null) {
-            return null;
-        } else if (Math.abs(myLocation.getLatitude()) < 0.01 && Math.abs(myLocation.getLongitude()) < 0.01) {
-            // Unlikely coordinate
-            return null;
-        } else {
-            return myLocation;
         }
     }
 
