@@ -106,7 +106,7 @@ class PlaceDatabase {
                     // Add to database
                     insertStatement.bindDouble(1, record.latitude);
                     insertStatement.bindDouble(2, record.longitude);
-                    insertStatement.bindDouble(3, record.altitude);
+                    insertStatement.bindDouble(3, record.height);
                     insertStatement.bindString(4, record.url);
                     insertStatement.executeInsert();
                     // Update progress dialog

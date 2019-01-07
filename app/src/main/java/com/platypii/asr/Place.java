@@ -8,13 +8,13 @@ class Place {
 
     final double latitude;
     final double longitude;
-    final double altitude;
+    final double height;
     final String url;
 
-    Place(double latitude, double longitude, double altitude, String url) {
+    Place(double latitude, double longitude, double height, String url) {
         this.latitude = latitude;
         this.longitude = longitude;
-        this.altitude = altitude;
+        this.height = height;
         this.url = url;
     }
 
@@ -27,7 +27,7 @@ class Place {
     public boolean equals(Object obj) {
         if (obj instanceof Place) {
             final Place other = (Place) obj;
-            return latitude == other.latitude && longitude == other.longitude && altitude == other.altitude;
+            return latitude == other.latitude && longitude == other.longitude && height == other.height;
         } else {
             return false;
         }
@@ -35,7 +35,7 @@ class Place {
 
     @Override
     public String toString() {
-        return String.format(Locale.US, "Place(%.6f, %.6f, %.1f)", latitude, longitude, altitude);
+        return String.format(Locale.US, "Place(%.6f, %.6f, %.1f)", latitude, longitude, height);
     }
 
     @Override

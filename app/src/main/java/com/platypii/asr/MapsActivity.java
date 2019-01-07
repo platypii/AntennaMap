@@ -289,13 +289,13 @@ public class MapsActivity extends Activity implements GoogleMap.OnCameraMoveList
                 for (Place tower : towers) {
                     if (!markers.containsKey(tower)) {
                         // Create new marker
-                        final float alpha = ((float) (tower.altitude) / 630f) * 0.4f + 0.6f;
-                        final BitmapDescriptor icon = Assets.getSizedIcon(MapsActivity.this, tower.altitude);
+                        final float alpha = ((float) (tower.height) / 630f) * 0.4f + 0.6f;
+                        final BitmapDescriptor icon = Assets.getSizedIcon(MapsActivity.this, tower.height);
                         final Marker marker = map.addMarker(
                                 new MarkerOptions()
                                         .position(tower.latLng())
                                         .icon(icon)
-                                        .title(Convert.toFeet(tower.altitude))
+                                        .title(Convert.toFeet(tower.height))
                                         .alpha(alpha)
                         );
                         markers.put(tower, marker);
