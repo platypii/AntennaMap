@@ -5,6 +5,6 @@ package com.platypii.asr;
  */
 class Convert {
     static String toFeet(double meters) {
-        return (int) (3.28084 * meters) + "ft";
+        return (int) (3.28084 * meters) + " ft";
     }
 }
