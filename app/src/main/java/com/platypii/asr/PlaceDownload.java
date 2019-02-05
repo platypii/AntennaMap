@@ -1,6 +1,7 @@
 package com.platypii.asr;
 
 import android.os.AsyncTask;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import com.crashlytics.android.Crashlytics;
 import java.io.FileOutputStream;
@@ -35,6 +36,7 @@ class PlaceDownload {
     }
 
     private static class CheckETagTask extends AsyncTask<Void, Integer, Boolean> {
+        @NonNull
         @Override
         protected Boolean doInBackground(Void... params) {
             try {
@@ -77,13 +79,13 @@ class PlaceDownload {
             } catch (IOException e) {
                 Log.e("PlaceFile", "Download error: " + e, e);
                 Crashlytics.logException(e);
-                return null;
+                return false;
             }
         }
 
         @Override
-        protected void onPostExecute(Boolean eTagMatches) {
-            if (eTagMatches != null && !eTagMatches) {
+        protected void onPostExecute(@NonNull Boolean eTagMatches) {
+            if (!eTagMatches) {
                 // Newer version available for download
                 Log.w(TAG, "New place file found");
                 new DownloadTask().execute();

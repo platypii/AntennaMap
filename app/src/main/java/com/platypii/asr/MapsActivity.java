@@ -10,6 +10,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.widget.ProgressBar;
@@ -228,7 +229,7 @@ public class MapsActivity extends Activity implements GoogleMap.OnCameraMoveList
             return ASR.query(bounds);
         }
         @Override
-        protected void onPostExecute(List<Place> towers) {
+        protected void onPostExecute(@Nullable List<Place> towers) {
             if (towers != null) {
                 // Remove stale markers
                 final Set<Place> toDelete = new HashSet<>();

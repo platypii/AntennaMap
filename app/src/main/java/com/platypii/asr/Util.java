@@ -1,7 +1,6 @@
 package com.platypii.asr;
 
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -29,22 +28,16 @@ class Util {
         fileOutputStream.close();
     }
 
-    @Nullable
+    @NonNull
     static String md5(File file) throws NoSuchAlgorithmException, IOException {
-        InputStream inputStream = null;
         final MessageDigest md = MessageDigest.getInstance("MD5");
-        try {
-            inputStream = new DigestInputStream(new FileInputStream(file), md);
+        try (InputStream inputStream = new DigestInputStream(new FileInputStream(file), md)) {
             final byte[] buffer = new byte[1024];
             while (inputStream.read(buffer) != -1) {
                 // Do nothing
             }
             // Format digest as hex
             return String.format("%1$032x", new BigInteger(1, md.digest()));
-        } finally {
-            if (inputStream != null) {
-                inputStream.close();
-            }
         }
     }
 
@@ -52,9 +45,7 @@ class Util {
      * Count the number of lines in a gzip file (as if it was unzipped).
      */
     static int lineCountGzip(File gzFile) throws IOException {
-        InputStream inputStream = null;
-        try {
-            inputStream = new GZIPInputStream(new FileInputStream(gzFile));
+        try (InputStream inputStream = new GZIPInputStream(new FileInputStream(gzFile))) {
             final byte[] buffer = new byte[4096];
             int bufferLength;
             int count = 0;
@@ -66,12 +57,7 @@ class Util {
                 }
             }
             return count;
-        } finally {
-            if (inputStream != null) {
-                inputStream.close();
-            }
         }
     }
 
 }
-

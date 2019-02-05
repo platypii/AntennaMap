@@ -8,7 +8,7 @@ import static org.junit.Assert.assertNotEquals;
 
 public class PlaceSpec {
 
-    private Place seattle = new Place(47.6, -122.3, 1000, "");
+    private final Place seattle = new Place(47.6, -122.3, 1000, "");
 
     @Test
     public void placeToString() {

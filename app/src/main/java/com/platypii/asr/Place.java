@@ -33,6 +33,7 @@ class Place {
         }
     }
 
+    @NonNull
     @Override
     public String toString() {
         return String.format(Locale.US, "Place(%.6f, %.6f, %.1f)", latitude, longitude, height);

@@ -6,7 +6,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.Writer;
 import java.util.Scanner;
 import java.util.zip.GZIPOutputStream;
 import org.junit.Test;
@@ -15,7 +14,7 @@ import static org.junit.Assert.assertEquals;
 
 public class UtilSpec {
 
-    String data = "This is the data.";
+    private final String data = "This is the data.";
 
     @Test
     public void copyInputStreamToFile() throws IOException {

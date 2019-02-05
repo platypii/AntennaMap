@@ -16,23 +16,27 @@ class Assets {
     private static final BitmapDescriptor sizedIcons[] = new BitmapDescriptor[7];
 
     static BitmapDescriptor getSizedIcon(@NonNull Context context, double height) {
-        final float density = context.getResources().getDisplayMetrics().density;
         int index = (int) (height / 100);
         if (index > 6) index = 6;
         if (sizedIcons[index] == null) {
             // Generate icon
-            final int size = (int) ((14 + index * 5) * density);
-            final Drawable drawable = ContextCompat.getDrawable(context, R.drawable.a);
-            if (drawable instanceof BitmapDrawable) {
-                final BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
-                final Bitmap bitmap = bitmapDrawable.getBitmap();
-                final Bitmap bitmapScaled = Bitmap.createScaledBitmap(bitmap, size * 3 / 4, size, false);
-                sizedIcons[index] = BitmapDescriptorFactory.fromBitmap(bitmapScaled);
-            } else {
-                return null; // Should never happen
-            }
+            sizedIcons[index] = generateIcon(context, index);
         }
         return sizedIcons[index];
+    }
+
+    private static BitmapDescriptor generateIcon(@NonNull Context context, int index) {
+        final float density = context.getResources().getDisplayMetrics().density;
+        final int size = (int) ((14 + index * 5) * density);
+        final Drawable drawable = ContextCompat.getDrawable(context, R.drawable.a);
+        if (drawable instanceof BitmapDrawable) {
+            final BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
+            final Bitmap bitmap = bitmapDrawable.getBitmap();
+            final Bitmap bitmapScaled = Bitmap.createScaledBitmap(bitmap, size * 3 / 4, size, false);
+            return BitmapDescriptorFactory.fromBitmap(bitmapScaled);
+        } else {
+            return null; // Should never happen
+        }
     }
 
 }
