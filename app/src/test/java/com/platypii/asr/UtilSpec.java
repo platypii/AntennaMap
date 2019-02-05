@@ -14,25 +14,25 @@ import static org.junit.Assert.assertEquals;
 
 public class UtilSpec {
 
-    private final String data = "This is the data.";
+    private static final String data = "This is the data.";
 
     @Test
     public void copyInputStreamToFile() throws IOException {
-        InputStream is = new ByteArrayInputStream(data.getBytes());
-        File outfile = File.createTempFile("testfile", ".txt");
+        final InputStream is = new ByteArrayInputStream(data.getBytes());
+        final File outfile = File.createTempFile("testfile", ".txt");
 
         // Copy
         Util.copy(is, outfile);
 
         // Validate
-        String contents = new Scanner(outfile).nextLine();
+        final String contents = new Scanner(outfile).nextLine();
         assertEquals(data, contents);
     }
 
     @Test
     public void computeMD5() throws Exception {
-        InputStream is = new ByteArrayInputStream(data.getBytes());
-        File outfile = File.createTempFile("testfile", ".txt");
+        final InputStream is = new ByteArrayInputStream(data.getBytes());
+        final File outfile = File.createTempFile("testfile", ".txt");
         Util.copy(is, outfile);
 
         assertEquals("2170fd3c6e38537a865e210604a1b6dd", Util.md5(outfile));
@@ -41,8 +41,8 @@ public class UtilSpec {
     @Test
     public void countLines() throws Exception {
         // Write test gzip file
-        File gzFile = File.createTempFile("testfile", ".txt.gz");
-        OutputStream os = new GZIPOutputStream(new FileOutputStream(gzFile));
+        final File gzFile = File.createTempFile("testfile", ".txt.gz");
+        final OutputStream os = new GZIPOutputStream(new FileOutputStream(gzFile));
         os.write(data.getBytes());
         os.write('\n');
         os.write(data.getBytes());
@@ -50,7 +50,9 @@ public class UtilSpec {
         os.write(data.getBytes());
         os.write('\n');
         os.close();
-
         assertEquals(3, Util.lineCountGzip(gzFile));
+
+        // Test null file
+        assertEquals(0, Util.lineCountGzip(null));
     }
 }

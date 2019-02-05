@@ -5,18 +5,16 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import com.crashlytics.android.Crashlytics;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.Iterator;
-import java.util.zip.GZIPInputStream;
 
+// Would implement Iterable<Place> if it wasn't static
 class PlaceFile {
     private static final String TAG = "PlaceFile";
 
+    @Nullable
     static File cacheFile;
 
     static void start(@NonNull Context appContext) {
@@ -45,94 +43,35 @@ class PlaceFile {
     }
 
     /**
-     * Scan the cache file for length and MD5
+     * Compute MD5 checksum of cache file
      */
-    @Nullable
+    @NonNull
     static String md5() {
-        try {
-            return Util.md5(cacheFile);
-        } catch (Exception e) {
-            Log.e(TAG, "Failed to compute MD5 of place file", e);
-            return null;
-        }
+        return Util.md5(cacheFile);
     }
 
+    /**
+     * Return cache file size in bytes
+     */
     static long size() {
-        return cacheFile.length();
+        return cacheFile == null ? 0 : cacheFile.length();
     }
 
+    /**
+     * Return number of lines in cache file.
+     * Returns 0 if doesn't exist.
+     */
     static int rowCount() {
-        try {
-            return Util.lineCountGzip(cacheFile);
-        } catch (IOException e) {
-            Log.e(TAG, "Failed to count lines of place file", e);
-            return -1;
-        }
+        return Util.lineCountGzip(cacheFile);
     }
 
+    @Nullable
     static Iterator<Place> iterator() {
         if (cacheFile == null) {
             Log.e(TAG, "Not initialized");
             return null;
         } else {
-            return new Iterator<Place>() {
-                private BufferedReader reader;
-                private String nextLine;
-
-                {
-                    try {
-                        reader = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(cacheFile))));
-                        // Skip first line
-                        reader.readLine();
-                        nextLine = reader.readLine();
-                    } catch (IOException e) {
-                        Log.e(TAG, "Error reading file", e);
-                        Crashlytics.logException(e);
-                    }
-                }
-
-                @Override
-                public boolean hasNext() {
-                    return nextLine != null;
-                }
-
-                @Override
-                public Place next() {
-                    final Place record = parseLine(nextLine);
-                    try {
-                        nextLine = reader.readLine();
-                    } catch (IOException e) {
-                        nextLine = null;
-                    }
-                    return record;
-                }
-
-                @Override
-                public void remove() {
-                }
-            };
-        }
-    }
-
-    /**
-     * Parse a CSV line into a place
-     */
-    private static Place parseLine(@NonNull String line) {
-        final String[] split = line.split(",", 4);
-        if (split[0].equals("") || split[1].equals("") || split[2].equals("")) {
-            Log.w(TAG, "Failed to parse line " + line);
-            return null;
-        }
-        try {
-            final double latitude = Double.parseDouble(split[0]);
-            final double longitude = Double.parseDouble(split[1]);
-            final double altitude = Double.parseDouble(split[2]);
-            final String url = split[3];
-            return new Place(latitude, longitude, altitude, url);
-        } catch (Exception e) {
-            Log.e(TAG, "Failed to parse line " + line, e);
-            Crashlytics.logException(e);
-            return null;
+            return new PlaceFileIterator(cacheFile);
         }
     }
 

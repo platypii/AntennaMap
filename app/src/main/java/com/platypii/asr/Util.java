@@ -1,6 +1,8 @@
 package com.platypii.asr;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import com.crashlytics.android.Crashlytics;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -28,23 +30,37 @@ class Util {
         fileOutputStream.close();
     }
 
+    /**
+     * Compute MD5 checksum of file. Return "" if any errors.
+     */
     @NonNull
-    static String md5(File file) throws NoSuchAlgorithmException, IOException {
-        final MessageDigest md = MessageDigest.getInstance("MD5");
-        try (InputStream inputStream = new DigestInputStream(new FileInputStream(file), md)) {
-            final byte[] buffer = new byte[1024];
-            while (inputStream.read(buffer) != -1) {
-                // Do nothing
+    static String md5(@Nullable File file) {
+        if (file == null || !file.exists()) {
+            return "";
+        }
+        try {
+            final MessageDigest md = MessageDigest.getInstance("MD5");
+            try (InputStream inputStream = new DigestInputStream(new FileInputStream(file), md)) {
+                final byte[] buffer = new byte[1024];
+                while (inputStream.read(buffer) != -1) {
+                    // Do nothing
+                }
+                // Format digest as hex
+                return String.format("%1$032x", new BigInteger(1, md.digest()));
             }
-            // Format digest as hex
-            return String.format("%1$032x", new BigInteger(1, md.digest()));
+        } catch (IOException | NoSuchAlgorithmException e) {
+            Crashlytics.logException(e);
+            return "";
         }
     }
 
     /**
      * Count the number of lines in a gzip file (as if it was unzipped).
      */
-    static int lineCountGzip(File gzFile) throws IOException {
+    static int lineCountGzip(@Nullable File gzFile) {
+        if (gzFile == null || !gzFile.exists()) {
+            return 0;
+        }
         try (InputStream inputStream = new GZIPInputStream(new FileInputStream(gzFile))) {
             final byte[] buffer = new byte[4096];
             int bufferLength;
@@ -57,6 +73,8 @@ class Util {
                 }
             }
             return count;
+        } catch (IOException e) {
+            return 0;
         }
     }
 
