@@ -61,7 +61,7 @@ public class MapsActivity extends Activity implements GoogleMap.OnCameraMoveList
         MapsActivity.instance = this;
 
         // Initialize Services in the background
-        ASR.init(getApplicationContext());
+        Antennas.init(getApplicationContext());
     }
 
     @Override
@@ -226,7 +226,7 @@ public class MapsActivity extends Activity implements GoogleMap.OnCameraMoveList
         }
         @Override
         protected List<Place> doInBackground(Void... params) {
-            return ASR.query(bounds);
+            return Antennas.query(bounds);
         }
         @Override
         protected void onPostExecute(@Nullable List<Place> towers) {

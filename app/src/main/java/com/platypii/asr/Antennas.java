@@ -7,8 +7,8 @@ import android.util.Log;
 import com.google.android.gms.maps.model.LatLngBounds;
 import java.util.List;
 
-class ASR {
-    private static final String TAG = "ASR";
+class Antennas {
+    private static final String TAG = "Antennas";
 
     private static final int LIMIT = 32;
 
@@ -24,7 +24,7 @@ class ASR {
         PlaceFile.start(appContext);
         PlaceDownload.updateAsync();
         if (PlaceDatabase.isReady()) {
-            ASR.ready();
+            Antennas.ready();
         }
     }
 

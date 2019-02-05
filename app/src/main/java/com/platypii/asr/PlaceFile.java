@@ -34,7 +34,7 @@ class PlaceFile {
                 try {
                     final InputStream defaultCacheFile = appContext.getResources().openRawResource(R.raw.antennas_csv_gz);
                     Util.copy(defaultCacheFile, cacheFile);
-                    ASR.reloadRequired = true;
+                    Antennas.reloadRequired = true;
                     Log.i(TAG, "Copied default cache file from resources");
                 } catch (IOException e) {
                     Log.e(TAG, "Error copying default cache file from resources", e);

@@ -89,9 +89,9 @@ class PlaceDownload {
                 // Newer version available for download
                 Log.w(TAG, "New place file found");
                 new DownloadTask().execute();
-            } else if (ASR.reloadRequired) {
+            } else if (Antennas.reloadRequired) {
                 // Latest version already downloaded, but reload required
-                ASR.fileLoaded();
+                Antennas.fileLoaded();
             }
         }
     }
@@ -152,7 +152,7 @@ class PlaceDownload {
         protected void onPostExecute(Boolean success) {
             MapsActivity.dismissProgress();
             if (success) {
-                ASR.fileLoaded();
+                Antennas.fileLoaded();
             }
         }
     }

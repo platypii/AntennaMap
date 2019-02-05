@@ -137,7 +137,7 @@ class PlaceDatabase {
         @Override
         protected void onPostExecute(Void result) {
             MapsActivity.dismissProgress();
-            ASR.ready();
+            Antennas.ready();
         }
     }
 
