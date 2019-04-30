@@ -146,7 +146,7 @@ class PlaceDatabase {
      */
     static List<Place> query(double minLatitude, double maxLatitude, double minLongitude, double maxLongitude, int limit) {
         if (started && !loading) {
-            final String params[] = {
+            final String[] params = {
                     Double.toString(minLatitude),
                     Double.toString(maxLatitude),
                     Double.toString(minLongitude),

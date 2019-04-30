@@ -48,6 +48,10 @@ public class MapsActivity extends Activity implements GoogleMap.OnCameraMoveList
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+
+        // Show info screen
+        ConsentScreen.onStart(this);
+
         // Find view elements
         progressSpinner = this.findViewById(R.id.progressSpinner);
         progressSpinner.setVisibility(ProgressBar.GONE);

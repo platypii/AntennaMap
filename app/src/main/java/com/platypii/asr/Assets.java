@@ -14,7 +14,7 @@ class Assets {
 
     // sizedIcons[0] = 0..100m
     // sizedIcons[1] = 1..200m
-    private static final BitmapDescriptor sizedIcons[] = new BitmapDescriptor[7];
+    private static final BitmapDescriptor[] sizedIcons = new BitmapDescriptor[7];
 
     @Nullable
     static BitmapDescriptor getSizedIcon(@NonNull Context context, double height) {

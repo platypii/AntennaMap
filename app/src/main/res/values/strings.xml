@@ -2,5 +2,6 @@
 <resources>
 
     <string name="app_name">Antenna Map</string>
+    <string name="welcome_message">Antenna Map displays the tallest antennas in view.\n\nTo use the app, you must agree to collection of anonymous usage data.\n\nhttps://antennamap.com/privacy</string>
 
 </resources>
