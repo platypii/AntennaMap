@@ -10,8 +10,8 @@ android {
         applicationId "com.platypii.asr"
         minSdkVersion 16
         targetSdkVersion 28
-        versionCode 18
-        versionName "2.3"
+        versionCode 19
+        versionName "2.4-beta"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
