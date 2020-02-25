@@ -1,6 +1,6 @@
 package com.platypii.asr;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 /**
  * Convert units

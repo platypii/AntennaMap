@@ -1,7 +1,7 @@
 package com.platypii.asr;
 
 import android.os.AsyncTask;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.util.Log;
 import com.crashlytics.android.Crashlytics;
 import java.io.FileOutputStream;
