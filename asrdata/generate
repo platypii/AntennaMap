@@ -22,12 +22,20 @@ with open('data/asr-full.csv', encoding='ISO-8859-1') as infile:
     df = df[df['Status Code'] == "C"]
     df = df[df['Overall Height Above Ground'] >= 45.72]
     # Compute lat,lon
-    df['lat'] = np.where(df['Latitude Direction'] == 'N', df['Latitude_Total_Seconds'], "-" + df['Latitude_Total_Seconds']).astype(float) / 3600
-    df['lon'] = np.where(df['Longitude Direction'] == 'E', df['Longitude_Total_Seconds'], "-" + df['Longitude_Total_Seconds']).astype(float) / 3600
+    df['lat'] = np.where(
+        df['Latitude Direction'] == 'N',
+        df['Latitude_Total_Seconds'],
+        df['Latitude_Total_Seconds'].apply(lambda x: f"-{x}")
+    ).astype(float) / 3600
+    df['lon'] = np.where(
+        df['Longitude Direction'] == 'E',
+        df['Longitude_Total_Seconds'],
+        df['Longitude_Total_Seconds'].apply(lambda x: f"-{x}")
+    ).astype(float) / 3600
     df['height'] = df['Overall Height Above Ground'].astype(str)
     df['url'] = 'https://wireless2.fcc.gov/UlsApp/AsrSearch/asrRegistration.jsp?regKey=' + df['Unique System Identifier'].astype(str)
     # Sort
-    df = df.sort_values('Overall Height Above Ground', ascending=False)
+    df = df.sort_values(['Overall Height Above Ground', 'lat'], ascending=False)
     # Select columns
     df = df[['lat', 'lon', 'height', 'url']]
 
