@@ -6,9 +6,9 @@ import android.graphics.drawable.BitmapDrawable;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
-import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
 class Assets {
 
@@ -26,7 +26,7 @@ class Assets {
             try {
                 sizedIcons[index] = generateIcon(context, index);
             } catch (Exception e) {
-                Crashlytics.logException(e);
+                FirebaseCrashlytics.getInstance().recordException(e);
             }
         }
         return sizedIcons[index];

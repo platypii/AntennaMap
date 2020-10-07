@@ -3,12 +3,15 @@ package com.platypii.asr;
 import android.os.AsyncTask;
 import androidx.annotation.NonNull;
 import android.util.Log;
-import com.crashlytics.android.Crashlytics;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.ConnectException;
 import java.net.URL;
+import java.net.UnknownHostException;
 import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLException;
 
 class PlaceDownload {
     private static final String TAG = "PlaceDownload";
@@ -76,9 +79,12 @@ class PlaceDownload {
                         return true;
                     }
                 }
+            } catch (ConnectException | SSLException | UnknownHostException e) {
+                Log.e("PlaceFile", "Download error: " + e, e);
+                return false;
             } catch (IOException e) {
                 Log.e("PlaceFile", "Download error: " + e, e);
-                Crashlytics.logException(e);
+                FirebaseCrashlytics.getInstance().recordException(e);
                 return false;
             }
         }
@@ -135,9 +141,12 @@ class PlaceDownload {
                 fileOutput.close();
                 Log.w(TAG, "Downloaded place file");
                 return true;
+            } catch (ConnectException | SSLException | UnknownHostException e) {
+                Log.e(TAG, "Download failed: ", e);
+                return false;
             } catch (IOException e) {
                 Log.e(TAG, "Download failed: ", e);
-                Crashlytics.logException(e);
+                FirebaseCrashlytics.getInstance().recordException(e);
                 return false;
             }
         }

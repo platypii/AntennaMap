@@ -5,6 +5,8 @@ import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
 import android.util.Log;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 class MyLocation {
     private static final String TAG = "MyLocation";
@@ -12,7 +14,8 @@ class MyLocation {
     /**
      * Gets the users most recent location
      */
-    static Location getMyLocation(Context context) {
+    @Nullable
+    static Location getMyLocation(@NonNull Context context) {
         Location myLocation = null;
 
         // Get location from GPS if it's available

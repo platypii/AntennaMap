@@ -3,7 +3,7 @@ package com.platypii.asr;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import android.util.Log;
-import com.crashlytics.android.Crashlytics;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -20,7 +20,7 @@ class PlaceFileIterator implements Iterator<Place> {
     @Nullable
     private String nextLine;
 
-    PlaceFileIterator(File cacheFile) {
+    PlaceFileIterator(@NonNull File cacheFile) {
         try {
             reader = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(cacheFile))));
             // Skip first line
@@ -28,7 +28,7 @@ class PlaceFileIterator implements Iterator<Place> {
             nextLine = reader.readLine();
         } catch (IOException e) {
             Log.e(TAG, "Error reading file", e);
-            Crashlytics.logException(e);
+            FirebaseCrashlytics.getInstance().recordException(e);
         }
     }
 
@@ -72,7 +72,7 @@ class PlaceFileIterator implements Iterator<Place> {
             return new Place(latitude, longitude, altitude, url);
         } catch (Exception e) {
             Log.e(TAG, "Failed to parse line " + line, e);
-            Crashlytics.logException(e);
+            FirebaseCrashlytics.getInstance().recordException(e);
             return null;
         }
     }

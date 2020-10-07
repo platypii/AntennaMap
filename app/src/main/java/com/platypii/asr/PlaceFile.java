@@ -4,7 +4,7 @@ import android.content.Context;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import android.util.Log;
-import com.crashlytics.android.Crashlytics;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,7 +36,7 @@ class PlaceFile {
                     Log.i(TAG, "Copied default cache file from resources");
                 } catch (IOException e) {
                     Log.e(TAG, "Error copying default cache file from resources", e);
-                    Crashlytics.logException(e);
+                    FirebaseCrashlytics.getInstance().recordException(e);
                 }
             }
         }

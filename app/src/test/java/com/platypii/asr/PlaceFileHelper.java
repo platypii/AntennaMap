@@ -1,5 +1,6 @@
 package com.platypii.asr;
 
+import androidx.annotation.NonNull;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -13,6 +14,7 @@ class PlaceFileHelper {
             "47.279167,-97.340833,627.8,https://wireless2.fcc.gov/UlsApp/AsrSearch/asrRegistration.jsp?regKey=602919\n" +
             "38.240000,-121.501944,624.5,https://wireless2.fcc.gov/UlsApp/AsrSearch/asrRegistration.jsp?regKey=115436\n";
 
+    @NonNull
     static File writePlaceFile() throws IOException {
         final File gzFile = File.createTempFile("testfile", ".txt.gz");
         final OutputStream os = new GZIPOutputStream(new FileOutputStream(gzFile));

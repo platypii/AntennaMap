@@ -2,7 +2,7 @@ package com.platypii.asr;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import com.crashlytics.android.Crashlytics;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -49,7 +49,7 @@ class Util {
                 return String.format("%1$032x", new BigInteger(1, md.digest()));
             }
         } catch (IOException | NoSuchAlgorithmException e) {
-            Crashlytics.logException(e);
+            FirebaseCrashlytics.getInstance().recordException(e);
             return "";
         }
     }
