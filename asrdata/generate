@@ -14,6 +14,8 @@ import numpy as np
 # row[45]: Height
 # row[47]: GTOWER / LTOWER=LatticeTower / MAST / MTOWER / POLE / TANK / TOWER
 
+# TODO: Constructed but not Dismantled
+
 # Parse data/asr-full.csv
 with open('data/asr-full.csv', encoding='ISO-8859-1') as infile:
     df = pd.read_csv(infile, sep='|', index_col=False, usecols=[4,5,9,10,14,15,23,45])

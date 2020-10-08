@@ -5,11 +5,13 @@ set -e
 # Sorting order
 export LC_ALL=C
 
+URL=ftp://wirelessftp.fcc.gov/pub/uls/complete/r_tower.zip
+
 mkdir -p data
 
 # Download FCC data
 echo "Downloading latest ASR data"
-wget http://wireless.fcc.gov/uls/data/complete/r_tower.zip -O data/r_tower.zip
+wget $URL -O data/r_tower.zip
 
 # Unzip FCC data
 cd data
