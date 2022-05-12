@@ -1,5 +1,7 @@
-Antenna Map
-===========
+# Antenna Map
+
+[![workflow status](https://github.com/platypii/AntennaMap/actions/workflows/ci.yml/badge.svg)](https://github.com/platypii/AntennaMap/actions)
+[![mit license](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 Android app to display antennas in the FCC Antenna Structure Registration (ASR) database on a map.
 
