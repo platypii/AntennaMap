@@ -7,7 +7,6 @@ import android.preference.PreferenceManager;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import android.util.Log;
-import com.google.firebase.perf.FirebasePerformance;
 
 class ConsentScreen {
     private static final String TAG = "Consent";
@@ -16,9 +15,12 @@ class ConsentScreen {
     static void onStart(@NonNull Activity activity) {
         if (!consented(activity)) {
             showInfo(activity);
-        } else {
-            FirebasePerformance.getInstance().setPerformanceCollectionEnabled(true);
         }
+    }
+
+    static boolean consented(@NonNull Context context) {
+        final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        return preferences.getBoolean(PREF_CONSENT, false);
     }
 
     private static void showInfo(@NonNull Activity activity) {
@@ -29,18 +31,14 @@ class ConsentScreen {
                 .show();
     }
 
-    private static void setConsent(@NonNull Context context) {
+    private static void setConsent(@NonNull Activity activity) {
         Log.i(TAG, "User consented");
-        final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(activity);
         final SharedPreferences.Editor editor = preferences.edit();
         editor.putBoolean(PREF_CONSENT, true);
         editor.apply();
-        FirebasePerformance.getInstance().setPerformanceCollectionEnabled(true);
-    }
 
-    private static boolean consented(@NonNull Context context) {
-        final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        return preferences.getBoolean(PREF_CONSENT, false);
+        // Request location access after user has consented
+        Permissions.requestLocationPermissions(activity);
     }
-
 }

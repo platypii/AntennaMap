@@ -1,15 +1,15 @@
 apply plugin: 'com.android.application'
-apply plugin: 'com.google.firebase.crashlytics'
-apply plugin: 'com.google.firebase.firebase-perf'
 apply plugin: 'com.google.gms.google-services' // for firebase
+apply plugin: 'com.google.firebase.crashlytics'
 
 android {
-    compileSdkVersion 29
+    namespace 'com.platypii.asr'
+    compileSdkVersion 33
 
     defaultConfig {
         applicationId "com.platypii.asr"
-        minSdkVersion 16
-        targetSdkVersion 29
+        minSdkVersion 19
+        targetSdkVersion 33
         versionCode 23
         versionName "2.6-beta"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -29,14 +29,13 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'androidx.appcompat:appcompat:1.2.0'
-    implementation 'androidx.annotation:annotation:1.1.0'
+    annotationProcessor 'androidx.annotation:annotation:1.6.0'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'com.google.android.gms:play-services-maps:17.0.0'
-    implementation 'com.google.firebase:firebase-crashlytics:17.2.2'
-    implementation 'com.google.firebase:firebase-perf:19.0.9'
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.2'
-    testImplementation 'junit:junit:4.13'
-    androidTestImplementation 'junit:junit:4.13'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
+    implementation 'com.google.android.gms:play-services-maps:18.1.0'
+    implementation 'com.google.firebase:firebase-crashlytics:18.3.5'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
 }

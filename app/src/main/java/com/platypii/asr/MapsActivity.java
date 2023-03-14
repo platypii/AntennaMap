@@ -1,9 +1,7 @@
 package com.platypii.asr;
 
-import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.location.Location;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -11,7 +9,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
 import android.util.Log;
 import android.widget.ProgressBar;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -41,8 +38,6 @@ public class MapsActivity extends Activity implements GoogleMap.OnCameraMoveList
     private MyProgressBar progressBar; // Loading bar
 
     private static boolean firstLoad = true;
-
-    private static final int MY_PERMISSIONS_REQUEST_LOCATION = 64;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,17 +81,16 @@ public class MapsActivity extends Activity implements GoogleMap.OnCameraMoveList
     public void onMapReady(@NonNull GoogleMap map) {
         this.map = map;
         map.setMapType(GoogleMap.MAP_TYPE_HYBRID);
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        if (Permissions.hasLocationPermissions(this)) {
             // Enable location on map
             try {
                 map.setMyLocationEnabled(true);
             } catch (SecurityException e) {
                 Log.e(TAG, "Error enabling location", e);
             }
-        } else {
+        } else if (ConsentScreen.consented(this)) {
             // request the missing permissions
-            final String[] permissions = {Manifest.permission.ACCESS_FINE_LOCATION};
-            ActivityCompat.requestPermissions(this, permissions, MY_PERMISSIONS_REQUEST_LOCATION);
+            Permissions.requestLocationPermissions(this);
         }
         final LatLng center = map.getCameraPosition().target;
         if (firstLoad || (Math.abs(center.latitude) < 0.1 && Math.abs(center.longitude) < 0.1)) {
@@ -129,17 +123,13 @@ public class MapsActivity extends Activity implements GoogleMap.OnCameraMoveList
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode == MY_PERMISSIONS_REQUEST_LOCATION) {
-            if (grantResults.length == 1 &&
-                    Manifest.permission.ACCESS_FINE_LOCATION.equals(permissions[0]) &&
-                    grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                if (map != null) {
-                    try {
-                        map.setMyLocationEnabled(true);
-                    } catch (SecurityException e) {
-                        Log.e(TAG, "Error enabling location", e);
-                    }
-                }
+        if (requestCode == Permissions.REQUEST_LOCATION_CODE
+                && Permissions.isLocationGranted(permissions, grantResults)
+                && map != null) {
+            try {
+                map.setMyLocationEnabled(true);
+            } catch (SecurityException e) {
+                Log.e(TAG, "Error enabling location", e);
             }
         }
     }
